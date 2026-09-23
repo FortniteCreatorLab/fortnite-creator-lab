@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fortnite Creator Lab — Fluide & Aligné</title>
+<style>
+:root{
+  --bg:#070a12;--panel:#111625;--card:#101524;--card2:#151b2d;
+  --text:#f5f7ff;--muted:#8e99b7;--line:#303a5d;
+  --purple:#765cff;--cyan:#28d7ff;--green:#62e6a5;
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);
+font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+button,input{font:inherit}
+button{cursor:pointer;color:inherit}
+.app{height:100%;display:grid;grid-template-rows:68px 1fr}
+header{z-index:20;height:68px;display:flex;align-items:center;gap:12px;padding:10px 16px;
+background:rgba(7,10,18,.94);border-bottom:1px solid #1d2438}
+.brand{font-weight:900;white-space:nowrap;font-size:15px}
+.brand span{color:var(--cyan)}
+.search{margin-left:auto;width:250px;height:42px;border-radius:12px;border:1px solid #29324e;
+background:#0d1220;color:#fff;padding:0 13px;outline:none}
+.search:focus{border-color:var(--purple)}
+.btn{height:42px;border:1px solid #29324e;background:#0d1220;border-radius:12px;padding:0 13px}
+.btn:hover{background:#151b2d}
+.stage{position:relative;overflow:hidden;touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none;
+background:
+radial-gradient(circle at 50% 50%,rgba(118,92,255,.075),transparent 34%),
+linear-gradient(#ffffff04 1px,transparent 1px),
+linear-gradient(90deg,#ffffff04 1px,transparent 1px);
+background-size:auto,42px 42px,42px 42px}
+.world{position:absolute;width:2800px;height:1700px;left:0;top:0;transform-origin:0 0;will-change:transform}
+svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+path{fill:none;stroke:var(--line);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
+path.main{stroke:#515d89;stroke-width:4}
+.node{position:absolute;transform:translate(-50%,-50%);width:190px;min-height:82px;padding:13px 15px;
+border:1px solid #29324d;border-radius:16px;background:var(--card);box-shadow:0 8px 25px #0007;
+user-select:none;cursor:pointer;transition:.18s ease;z-index:2}
+.node:hover{transform:translate(-50%,-50%) scale(1.035);border-color:#59668e}
+.node.active{border-color:var(--cyan);box-shadow:0 0 0 2px #28d7ff18,0 12px 35px #0009}
+.node .icon{font-size:20px;line-height:1;margin-bottom:6px}
+.node b{display:block;font-size:13px;letter-spacing:.2px}
+.node small{display:block;color:var(--muted);font-size:11px;line-height:1.35;margin-top:4px}
+.mainNode{width:215px;min-height:92px;background:linear-gradient(145deg,#171d33,#0e1322);border-color:#3a4568}
+.mainNode b{font-size:14px}
+.center{width:310px;min-height:118px;text-align:center;border:0;
+background:linear-gradient(135deg,#7055ed,#29c8eb);box-shadow:0 20px 70px #6652df45;z-index:5}
+.center .icon{font-size:26px}.center b{font-size:18px}.center small{color:#e9f8ff}
+.zone{position:absolute;pointer-events:none;border:1px solid #ffffff05;border-radius:34px}
+.zone.left{left:180px;top:440px;width:720px;height:820px}
+.zone.top{left:1040px;top:90px;width:720px;height:700px}
+.zone.right{left:1900px;top:440px;width:720px;height:820px}
+.zoneLabel{position:absolute;color:#4e5a7b;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+.controls{position:absolute;z-index:10;left:16px;bottom:16px;display:flex;gap:8px}
+.help{position:absolute;z-index:10;left:50%;bottom:17px;transform:translateX(-50%);
+padding:7px 11px;border-radius:999px;background:#0b101bdb;border:1px solid #222b42;color:#727e9d;font-size:11px}
+.gestureHint{position:absolute;z-index:10;left:50%;bottom:17px;transform:translateX(-50%);
+padding:7px 11px;border-radius:999px;background:#0b101bd9;border:1px solid #222b42;color:#727e9d;
+font-size:11px;opacity:.85;pointer-events:none}
+@media(min-width:701px){.gestureHint{display:none}}
+.panel{position:absolute;z-index:30;right:16px;top:16px;bottom:16px;width:340px;padding:18px;
+background:#0e1422f2;border:1px solid #29334e;border-radius:18px;backdrop-filter:blur(15px);
+transform:translateX(calc(100% + 30px));transition:.25s ease;overflow:auto}
+.panel.open{transform:translateX(0)}
+.close{float:right;width:40px;padding:0}
+.panel h2{margin:20px 0 6px}.panel p{color:var(--muted);line-height:1.5}
+.tag{display:inline-block;padding:6px 9px;border-radius:999px;background:#171d31;border:1px solid #29334e;
+font-size:11px;margin:3px}
+.hidden{opacity:.08!important;pointer-events:none}
+@media(max-width:700px){
+  .app{grid-template-rows:58px 1fr}
+  header{height:58px;padding:8px 10px}
+  .brand{font-size:12px}.search{width:125px;height:38px}
+  header .btn{display:none}
+  .panel{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:45vh;transform:translateY(calc(100% + 20px))}
+  .panel.open{transform:translateY(0)}
+  .help{display:none}
+}
+@media(max-width:760px){.fc33videos{grid-template-columns:1fr}}
+</style>
+<style id="v18-touch">
+html,body{overscroll-behavior:none}
+#stage{touch-action:none!important;-webkit-user-select:none!important;user-select:none!important}
+</style>
+
+<style id="v21-multi-tree">
+#detailPage{
+  position:fixed; inset:0; z-index:100;
+  display:none; flex-direction:column;
+  background:
+    radial-gradient(circle at 50% 45%,rgba(118,92,255,.13),transparent 35%),
+    #070a12;
+}
+#detailPage.open{display:flex}
+.detailHead{
+  height:68px; flex:0 0 68px; display:flex; align-items:center; gap:12px;
+  padding:10px 16px; background:rgba(7,10,18,.96); border-bottom:1px solid #1d2438;
+}
+.backBtn{
+  height:42px; padding:0 15px; border:1px solid #29324e; border-radius:12px;
+  background:#0d1220; color:#fff; font-weight:800;
+}
+.detailTitle{font-weight:900;font-size:15px}
+.detailTitle span{color:#28d7ff}
+.detailSearch{margin-left:auto;width:230px;height:42px;border-radius:12px;border:1px solid #29324e;
+background:#0d1220;color:#fff;padding:0 13px;outline:none}
+.detailStage{position:relative;flex:1;overflow:hidden;touch-action:none;overscroll-behavior:none}
+.detailWorld{position:absolute;left:0;top:0;width:3000px;height:1900px;transform-origin:0 0}
+.detailLines{position:absolute;inset:0;width:3000px;height:1900px;pointer-events:none}
+.detailLines path{fill:none;stroke:#303a5d;stroke-width:4;stroke-linecap:round}
+.detailLines path.day{stroke:#765cff}
+.detailNodes{position:absolute;inset:0}
+.dnode{
+ position:absolute;transform:translate(-50%,-50%);width:230px;min-height:92px;
+ padding:13px 14px;border:1px solid #29324e;border-radius:18px;
+ background:linear-gradient(145deg,#111625,#0d1220);
+ box-shadow:0 15px 45px rgba(0,0,0,.28);text-align:center;
+ color:#fff;cursor:pointer;user-select:none;
+}
+.dnode:hover{border-color:#28d7ff;transform:translate(-50%,-50%) scale(1.03)}
+.dnode.center{width:290px;border-color:#28d7ff;box-shadow:0 0 45px rgba(40,215,255,.14)}
+.dnode.day{border-color:#765cff}
+.dnode .ico{font-size:27px;margin-bottom:4px}
+.dnode b{display:block;font-size:14px}
+.dnode small{display:block;color:#8e99b7;margin-top:5px;line-height:1.35}
+.detailHint{
+ position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+ padding:9px 15px;border:1px solid #29324e;border-radius:999px;
+ background:rgba(13,18,32,.92);color:#8e99b7;font-size:13px;z-index:4;
+}
+.detailPanel{
+ position:absolute;right:18px;top:86px;width:min(390px,calc(100% - 36px));
+ max-height:calc(100% - 110px);overflow:auto;padding:20px;border-radius:20px;
+ background:rgba(13,18,32,.97);border:1px solid #29324e;display:none;z-index:5;
+}
+.detailPanel.open{display:block}
+.detailPanel h2{margin:5px 0 8px}.detailPanel p{color:#aeb7d0;line-height:1.55}
+.detailTags{display:flex;flex-wrap:wrap;gap:7px}.detailTags span{
+ padding:6px 9px;border-radius:999px;background:#171e32;border:1px solid #29324e;font-size:12px
+}
+@media(max-width:700px){
+ .detailHead{height:62px;flex-basis:62px;padding:8px 10px}
+ .detailSearch{width:120px}
+ .detailWorld{transform-origin:0 0}
+ .dnode{width:205px}
+ .dnode.center{width:255px}
+}
+</style>
+
+
+<style id="v22-leaf">
+#leafPage{position:fixed;inset:0;z-index:220;display:none;flex-direction:column;background:#070a12}
+#leafPage.open{display:flex}
+.leafHead{height:68px;flex:0 0 68px;display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #1d2438;background:rgba(7,10,18,.97)}
+.leafBody{flex:1;overflow:auto;padding:28px 18px 120px;display:flex;justify-content:center}
+.leafCard{width:min(850px,100%);background:linear-gradient(145deg,#101625,#0b101c);border:1px solid #29324e;border-radius:24px;padding:28px;box-shadow:0 20px 70px #0008}
+.leafIcon{font-size:46px}.leafCard h1{margin:8px 0;font-size:30px}.leafCard h2{margin:26px 0 10px}.leafCard p{color:#aeb7d0;line-height:1.7}
+.leafList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.leafItem{padding:13px;border:1px solid #29324e;border-radius:14px;background:#0d1321;color:#dce3f5}
+.leafAction{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap}
+.v22btn{padding:13px 17px;border-radius:13px;border:1px solid #334064;background:#141c30;color:#fff;font-weight:900;cursor:pointer}
+.v22primary{background:linear-gradient(135deg,#5e4dff,#20cfff);border:0}
+@media(max-width:650px){.leafCard{padding:20px}.leafList{grid-template-columns:1fr}.leafCard h1{font-size:25px}}
+</style>
+
+<style id="fc38-style">
+.fc38checklist{display:grid;gap:9px;margin-top:10px}.fc38check{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.025);cursor:pointer;transition:.2s}.fc38check:hover{transform:translateX(3px);border-color:rgba(150,110,255,.45)}.fc38check input{width:19px;height:19px;accent-color:#7b5cff}.fc38check input:checked+span{text-decoration:line-through;opacity:.55}.fc38fab{position:fixed;right:18px;bottom:82px;z-index:9999;border:1px solid rgba(160,120,255,.45);background:rgba(17,12,31,.88);color:#fff;padding:13px 16px;border-radius:16px;font-weight:900;box-shadow:0 10px 40px rgba(0,0,0,.35);backdrop-filter:blur(14px);cursor:pointer}.fc38modal{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,2,7,.72);backdrop-filter:blur(10px)}.fc38box{width:min(760px,100%);max-height:86vh;overflow:auto;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:linear-gradient(180deg,#171329,#0b0b12);padding:24px;box-shadow:0 30px 100px rgba(0,0,0,.5)}.fc38top{display:flex;align-items:center;justify-content:space-between;gap:12px}.fc38close{border:0;background:#ffffff10;color:#fff;border-radius:12px;padding:8px 12px;font-size:20px;cursor:pointer}.fc38stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.fc38stat{padding:15px;border-radius:16px;background:#ffffff06;border:1px solid #ffffff0d}.fc38stat b{display:block;font-size:25px}.fc38bar{height:9px;border-radius:99px;background:#ffffff0d;overflow:hidden;margin:10px 0 18px}.fc38fill{height:100%;width:0;background:linear-gradient(90deg,#7b5cff,#4de1ff);transition:width .5s}.fc38session{display:grid;gap:9px}.fc38item{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #ffffff0d;border-radius:14px}.fc38item input{width:18px;height:18px;accent-color:#69e5a4}.fc38item.done span{text-decoration:line-through;opacity:.5}.fc38quiz{margin-top:18px;padding:18px;border-radius:18px;border:1px solid #ffffff0d;background:#ffffff04}.fc38btn{border:1px solid #ffffff14;background:#ffffff08;color:#fff;padding:10px 13px;border-radius:12px;cursor:pointer;margin:4px}.fc38btn:hover{background:#ffffff12}.fc38pill{display:inline-block;padding:5px 9px;border-radius:99px;background:#7b5cff22;color:#c9bcff;font-size:11px;font-weight:900}@media(max-width:650px){.fc38stats{grid-template-columns:1fr 1fr}.fc38fab{right:10px;bottom:10px}.fc38box{padding:17px}}
+</style>
+
+<style id="v39-fluid-align">
+/* V39 — fluidité + alignement final */
+html{scroll-behavior:smooth}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,.node,.fc33card,.fc33tool,.fc33video,.fc38fab,.fc38btn,.fc33back{
+  -webkit-tap-highlight-color:transparent;
+}
+button:focus-visible,input:focus-visible{outline:2px solid #28d7ff;outline-offset:2px}
+.node{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;line-height:1.2}
+.node.center{align-items:center;justify-content:center}
+.node .icon{flex:0 0 auto}
+.node b,.node small{width:100%}
+.mainNode{justify-content:center}
+.controls{align-items:center}
+.controls .btn{min-width:42px}
+#fc33{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility 0s linear .22s}
+#fc33.on{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s ease,visibility 0s linear 0s}
+.fc33bar{position:sticky;top:0;z-index:5;box-shadow:0 8px 30px rgba(0,0,0,.16)}
+.fc33back{min-width:104px;white-space:nowrap;transition:transform .16s ease,background .16s ease,border-color .16s ease}
+.fc33back:active{transform:scale(.97)}
+.fc33scroll{scroll-behavior:smooth;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.fc33wrap{width:100%;padding-bottom:20px;animation:fc39In .25s ease both}
+@keyframes fc39In{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fc33hero{width:100%;padding:4px 8px 2px}
+.fc33hero h1{max-width:100%;overflow-wrap:anywhere}
+.fc33grid{align-items:stretch;grid-auto-rows:1fr;max-width:1180px;margin-left:auto;margin-right:auto}
+.fc33card{width:100%;height:100%;min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;overflow:hidden}
+.fc33card h3{width:100%;padding-right:36px;overflow-wrap:anywhere}
+.fc33card p{width:100%;overflow-wrap:anywhere}
+.fc33go{margin-top:auto;position:static;align-self:flex-end;padding-top:12px}
+.fc33done{position:absolute!important}
+.fc33section{overflow:hidden}
+.fc33section h2,.fc33section h3{overflow-wrap:anywhere}
+.fc33tools{align-items:stretch}
+.fc33tool{height:100%;display:flex;flex-direction:column;justify-content:flex-start}
+.fc33videos{align-items:stretch}
+.fc33video{min-width:0;height:100%}
+.fc33video .vbody{overflow:hidden}
+.fc33video .vbody b,.fc33video .vbody span{overflow-wrap:anywhere}
+.fc38check{min-height:48px;align-items:flex-start}
+.fc38check input{flex:0 0 auto;margin-top:1px}
+.fc38item{min-height:52px}
+@media(max-width:900px){
+  .fc33grid{gap:12px}
+}
+@media(max-width:600px){
+  .node{width:176px;min-height:78px;padding:11px 12px;border-radius:14px}
+  .mainNode{width:198px;min-height:84px}
+  .node b{font-size:12px}.node small{font-size:10px}
+  .center{width:285px;min-height:106px}
+  .fc33bar{gap:8px}
+  .fc33back{min-width:92px;padding:10px 12px}
+  .fc33title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fc33scroll{padding-left:10px;padding-right:10px}
+  .fc33hero{padding-left:2px;padding-right:2px}
+  .fc33card{padding:15px;min-height:132px}
+  .fc33card h3{font-size:16px}
+  .fc33section{padding:16px;border-radius:17px}
+  .fc33tools,.fc33videos{gap:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+
+<style id="final-fab-fix">
+.fc38fab{position:fixed!important;right:max(18px,env(safe-area-inset-right))!important;bottom:max(18px,env(safe-area-inset-bottom))!important;z-index:9999!important;display:flex!important;align-items:center!important;justify-content:center!important;min-height:46px!important;white-space:nowrap!important;margin:0!important;transform:none!important;}
+@media(max-width:650px){.fc38fab{right:max(12px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important;min-height:44px!important;padding:11px 14px!important;}}
+</style>
+
+<style id="fcl-welcome-style">
+#fcl-welcome{position:fixed;inset:0;z-index:120000;display:none;align-items:center;justify-content:center;padding:22px;background:radial-gradient(circle at 50% 35%,rgba(66,84,255,.20),transparent 38%),rgba(3,5,12,.92);backdrop-filter:blur(14px)}
+#fcl-welcome.show{display:flex}
+#fcl-welcome-card{width:min(620px,100%);text-align:center;padding:38px 28px;border:1px solid rgba(255,255,255,.13);border-radius:28px;background:linear-gradient(180deg,rgba(20,24,45,.98),rgba(8,10,20,.98));box-shadow:0 30px 100px rgba(0,0,0,.58)}
+#fcl-welcome-logo{font-size:48px;margin-bottom:8px}
+#fcl-welcome-card h1{margin:0 0 12px;font-size:clamp(30px,6vw,48px);letter-spacing:-1.5px}
+#fcl-welcome-card h1 span{background:linear-gradient(90deg,#8c70ff,#26d8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#fcl-welcome-card p{max-width:500px;margin:0 auto 22px;color:#aeb5ca;line-height:1.65;font-size:15px}
+.fcl-welcome-pills{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 auto 25px}.fcl-welcome-pill{padding:8px 11px;border-radius:999px;background:#ffffff08;border:1px solid #ffffff10;color:#dce2f2;font-size:12px;font-weight:800}
+#fcl-welcome-start{border:0;border-radius:15px;padding:14px 25px;background:linear-gradient(90deg,#765cff,#25cfee);color:#fff;font-weight:950;font-size:16px;cursor:pointer;box-shadow:0 12px 35px rgba(77,83,255,.28)}
+#fcl-welcome-start:hover{transform:translateY(-1px)}
+#netlify-badge,#netlify-badge-container,.netlify-badge,[data-netlify-badge]{display:none!important}
+@media(max-width:650px){#fcl-welcome{padding:14px}#fcl-welcome-card{padding:30px 18px;border-radius:22px}#fcl-welcome-logo{font-size:40px}}
+</style>
+
+<style id="simple-welcome">
+#simpleWelcome{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#070914,#11162d);padding:24px;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+#simpleWelcome .sw-card{width:min(560px,100%);padding:38px 28px;border-radius:24px;background:rgba(20,24,45,.97);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 80px rgba(0,0,0,.45);text-align:center;color:#fff}
+#simpleWelcome h1{margin:0 0 12px;font-size:clamp(30px,7vw,46px)}
+#simpleWelcome p{margin:0 0 26px;color:#c0c7dc;line-height:1.5}
+#simpleWelcome button{width:100%;padding:16px 20px;border:0;border-radius:14px;background:linear-gradient(90deg,#6d5dfc,#8b5cf6);color:#fff;font-weight:800;font-size:17px;cursor:pointer}
+</style>
+
+<style id="legal-gate-style">
+#fcl-legal-gate{
+  position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:rgba(3,5,12,.94);backdrop-filter:blur(18px);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
+#fcl-legal-gate.hidden{display:none}
+.fcl-legal-card{
+  width:min(680px,100%);max-height:90vh;overflow:auto;padding:30px;
+  border:1px solid rgba(255,255,255,.13);border-radius:24px;
+  background:linear-gradient(180deg,#171c32,#0b0f1c);box-shadow:0 30px 100px rgba(0,0,0,.6);color:#fff;
+}
+.fcl-legal-card h1{margin:0 0 8px;font-size:clamp(25px,5vw,36px)}
+.fcl-legal-card .intro{color:#aeb7cf;line-height:1.55;margin:0 0 20px}
+.fcl-legal-rules{display:grid;gap:10px;margin:18px 0}
+.fcl-legal-rule{
+  padding:14px;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:rgba(255,255,255,.035);
+}
+.fcl-legal-rule b{display:block;margin-bottom:5px}
+.fcl-legal-rule span{color:#aeb7cf;font-size:13px;line-height:1.5}
+.fcl-legal-checks{display:grid;gap:10px;margin:20px 0}
+.fcl-legal-check{
+  display:flex;gap:11px;align-items:flex-start;padding:12px 13px;border-radius:13px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;
+}
+.fcl-legal-check input{width:19px;height:19px;flex:0 0 auto;margin-top:1px;accent-color:#765cff}
+.fcl-legal-check span{font-size:13px;line-height:1.5;color:#dfe5f5}
+#fcl-legal-accept{
+  width:100%;padding:15px 18px;border:0;border-radius:14px;background:linear-gradient(90deg,#765cff,#25cfee);
+  color:#fff;font-weight:900;font-size:16px;cursor:pointer;transition:.2s;
+}
+#fcl-legal-accept:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.3)}
+.fcl-legal-note{font-size:11px;color:#77819d;line-height:1.5;margin-top:13px;text-align:center}
+@media(max-width:650px){.fcl-legal-card{padding:22px 17px;border-radius:20px}}
+</style>
+</head>
+<body>
+<div id="fcl-legal-gate" role="dialog" aria-modal="true" aria-labelledby="fcl-legal-title">
+  <div class="fcl-legal-card">
+    <div style="font-size:38px;margin-bottom:7px">🔐</div>
+    <h1 id="fcl-legal-title">Avant d'accéder à la formation</h1>
+    <p class="intro">Bienvenue ! Avant de commencer, lis les règles ci-dessous et confirme que tu les acceptes.</p>
+
+    <div class="fcl-legal-rules">
+      <div class="fcl-legal-rule">
+        <b>📄 Conditions d'utilisation</b>
+        <span>La formation est destinée à un usage personnel. L'accès est réservé à la personne qui a acheté ou obtenu la formation.</span>
+      </div>
+      <div class="fcl-legal-rule">
+        <b>🚫 Interdiction de partage</b>
+        <span>Il est interdit de partager, revendre, publier, copier ou transmettre tout ou partie de la formation, de ses vidéos, fichiers ou accès à d'autres personnes.</span>
+      </div>
+      <div class="fcl-legal-rule">
+        <b>🔒 Respect des informations</b>
+        <span>Les informations et contenus accessibles dans la formation ne doivent pas être redistribués ou mis à disposition publiquement.</span>
+      </div>
+    </div>
+
+    <div class="fcl-legal-checks">
+      <label class="fcl-legal-check"><input type="checkbox" data-legal-check><span>J'ai lu et j'accepte les <b>conditions d'utilisation</b> de la formation.</span></label>
+      <label class="fcl-legal-check"><input type="checkbox" data-legal-check><span>Je comprends que cet accès est <b>personnel</b> et que je ne dois pas partager, revendre ou transmettre la formation.</span></label>
+      <label class="fcl-legal-check"><input type="checkbox" data-legal-check><span>Je confirme avoir pris connaissance des informations présentées avant d'accéder à la formation.</span></label>
+    </div>
+
+    <button id="fcl-legal-accept" disabled>✅ J'accepte et j'accède à la formation</button>
+    <div class="fcl-legal-note">Cette fenêtre présente les règles d'accès au site. Pour une conformité juridique complète, les textes officiels (CGV, politique de confidentialité, droit de rétractation, cookies, etc.) doivent correspondre à ta situation et être réellement disponibles sur le site.</div>
+  </div>
+</div>
+<div id="fcl-welcome" aria-modal="true" role="dialog">
+  <div id="fcl-welcome-card">
+    <div id="fcl-welcome-logo">⚡</div>
+    <h1>Bienvenue sur <span>Fortnite Creator Lab</span></h1>
+    <p>Bienvenue dans ta formation. Ici, tu vas pouvoir <b>progresser sur Fortnite</b>, améliorer ton gameplay et apprendre à créer du contenu.</p>
+    <div class="fcl-welcome-pills">
+      <span class="fcl-welcome-pill">🎮 JOUER</span><span class="fcl-welcome-pill">🎬 CRÉER</span><span class="fcl-welcome-pill">📚 APPRENDRE</span><span class="fcl-welcome-pill">🏆 PROGRESSER</span>
+    </div>
+    <button id="fcl-welcome-start">🚀 Commencer la formation</button>
+  </div>
+</div>
+
+
+<div class="app">
+<header>
+  <div class="brand">⚡ FORTNITE <span>CREATOR LAB</span></div><div style="font-size:10px;color:#7f89a6;margin-left:4px">🔒 Accès personnel</div>
+  <input id="search" class="search" placeholder="Rechercher…">
+  <button class="btn" id="fit">⌗ Tout voir</button>
+  <button class="btn" id="reset">⌖ Centre</button>
+</header>
+
+<main id="stage" class="stage">
+<div id="world" class="world">
+  <div class="zone left"></div><div class="zone top"></div><div class="zone right"></div>
+  <svg id="lines"></svg>
+  <div id="nodes"></div>
+</div>
+
+<div class="gestureHint">☝️ 1 doigt : déplacer • 🤏 2 doigts : zoomer</div>
+<div class="help">Glisse pour déplacer • pince / molette pour zoomer • clique sur un point</div>
+
+<aside id="panel" class="panel">
+  <button class="btn close" id="close">×</button>
+  <div id="panelContent"></div>
+</aside>
+</main>
+</div>
+
+<script>
+const M=[
+["center","⚡","FORTNITE CREATOR LAB","Jouer • créer • progresser",1400,850,[],"center"],
+
+["game","🎮","JOUER","La partie Fortnite",720,620,["Training","Matchs","Performance"],"main"],
+["create","🎬","CRÉER","Transformer tes parties en contenu",1400,500,["Clips","Shorts","Montage"],"main"],
+["learn","📚","APPRENDRE","Développer tes compétences",2080,620,["Academy","Media","Quêtes"],"main"],
+
+["training","🎯","TRAINING","Entraînement ciblé",400,520,["Training Center","AI Coach","Weakness Radar"],"child"],
+["matches","🕹️","MATCHS","Suivi de tes parties",400,720,["Match Journal","Sessions","Best Moments"],"child"],
+["performance","📈","PERFORMANCE","Tes statistiques",400,920,["Score","Progression","Stats"],"child"],
+
+["clips","✂️","CLIPS","Tes meilleurs moments",1180,250,["Clip Vault","Best Moments","Clip → Content"],"child"],
+["shorts","📱","SHORTS","Vidéos courtes",1400,190,["Storyboard","Video Builder","Retention"],"child"],
+["editing","🎨","MONTAGE","Montage et identité",1620,250,["Editing Blueprint","Sound Design","Covers"],"child"],
+
+["academy","🧠","ACADEMY","Formation",2400,520,["Lessons","Learning Path","Creator Academy"],"child"],
+["media","🌐","MEDIA","Exemples et ressources",2400,720,["Media Search","Watch Mode","Examples"],"child"],
+["quests","🏆","QUÊTES","Objectifs et récompenses",2400,920,["XP","Achievements","Challenges"],"child"]
+];
+const E=[
+["center","game","main"],["center","create","main"],["center","learn","main"],
+["game","training"],["game","matches"],["game","performance"],
+["create","clips"],["create","shorts"],["create","editing"],
+["learn","academy"],["learn","media"],["learn","quests"]
+];
+const byId=Object.fromEntries(M.map(x=>[x[0],x]));
+const stage=document.getElementById("stage"),world=document.getElementById("world");
+const nodes=document.getElementById("nodes"),lines=document.getElementById("lines");
+const panel=document.getElementById("panel"),content=document.getElementById("panelContent");
+let scale=.72,targetScale=.72,tx=0,ty=0,targetTx=0,targetTy=0,drag=false,pid=null,lx=0,ly=0,raf=0;
+
+function draw(){
+  nodes.innerHTML="";
+  M.forEach(m=>{
+    const d=document.createElement("div");
+    d.className="node "+(m[7]==="center"?"center ":"")+(m[7]==="main"?"mainNode ":"");
+    d.dataset.id=m[0];d.style.left=m[4]+"px";d.style.top=m[5]+"px";
+    d.innerHTML=`<div class="icon">${m[1]}</div><b>${m[2]}</b><small>${m[3]}</small>`;
+    nodes.appendChild(d);
+  });
+  lines.innerHTML="";
+  E.forEach((e,i)=>{
+    const a=byId[e[0]],b=byId[e[1]];
+    const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.dataset.a=a[0];p.dataset.b=b[0];
+    p.classList.toggle("main",e[2]==="main");
+    p.setAttribute("d",`M ${a[4]} ${a[5]} L ${b[4]} ${b[5]}`);
+    lines.appendChild(p);
+  });
+}
+function camera(){
+  cancelAnimationFrame(raf);
+  raf=requestAnimationFrame(()=>{
+    tx+=(targetTx-tx)*.28;ty+=(targetTy-ty)*.28;scale+=(targetScale-scale)*.28;
+    world.style.transform=`translate3d(${tx}px,${ty}px,0) scale(${scale})`;
+    if(Math.abs(targetTx-tx)+Math.abs(targetTy-ty)+Math.abs(targetScale-scale)>.03) camera();
+  });
+}
+function center(){
+  const r=stage.getBoundingClientRect();
+  targetScale=.72;targetTx=r.width/2-1400*targetScale;targetTy=r.height/2-850*targetScale;
+  camera();
+}
+function fit(){
+  const r=stage.getBoundingClientRect();
+  const s=Math.min((r.width-30)/2500,(r.height-30)/1500,.92);
+  targetScale=s;targetTx=r.width/2-1400*s;targetTy=r.height/2-850*s;camera();
+}
+function zoom(f,cx=stage.clientWidth/2,cy=stage.clientHeight/2){
+  const old=targetScale,n=Math.max(.28,Math.min(1.5,old*f));
+  targetTx=cx-(cx-targetTx)*(n/old);targetTy=cy-(cy-targetTy)*(n/old);targetScale=n;camera();
+}
+function open(id){
+  const m=byId[id];
+  document.querySelectorAll(".node").forEach(n=>n.classList.toggle("active",n.dataset.id===id));
+  document.querySelectorAll("path").forEach(p=>p.style.stroke=(p.dataset.a===id||p.dataset.b===id)?"#28d7ff":"");
+  content.innerHTML=`<div style="font-size:36px">${m[1]}</div><h2>${m[2]}</h2>${id==="center"?`<div style="margin:14px 0;padding:14px;border:1px solid rgba(123,92,255,.35);border-radius:16px;background:rgba(123,92,255,.08)"><b style="font-size:18px">👋 Bienvenue dans Fortnite Creator Lab !</b><p style="margin:8px 0 0;color:#aeb4c8">Ici, tu vas pouvoir progresser sur Fortnite, apprendre à créer du contenu et suivre ta progression.</p></div>`:""}<p>${m[3]}</p>
+  <h3>Dans cette branche</h3><div>${m[6].map(t=>`<span class="tag">${t}</span>`).join("")}</div>`;
+  panel.classList.add("open");
+}
+function close(){panel.classList.remove("open");document.querySelectorAll(".node").forEach(n=>n.classList.remove("active"));document.querySelectorAll("path").forEach(p=>p.style.stroke="");}
+
+let mouseDown=false,mouseX=0,mouseY=0;
+let pinchDistance=0;
+let pinchStartScale=.92;
+let pinchWorldX=0,pinchWorldY=0;
+lx=0; ly=0;
+
+function touchDist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)}
+function touchMid(a,b){return {x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2}}
+
+function startPinch(a,b){
+  const r=stage.getBoundingClientRect();
+  const m=touchMid(a,b);
+  pinchDistance=Math.max(1,touchDist(a,b));
+  pinchStartScale=targetScale;
+  const sx=m.x-r.left, sy=m.y-r.top;
+  pinchWorldX=(sx-targetTx)/pinchStartScale;
+  pinchWorldY=(sy-targetTy)/pinchStartScale;
+}
+
+function updatePinch(a,b){
+  const r=stage.getBoundingClientRect();
+  const m=touchMid(a,b);
+  const sx=m.x-r.left, sy=m.y-r.top;
+  const ratio=touchDist(a,b)/pinchDistance;
+  const next=Math.max(.28,Math.min(1.5,pinchStartScale*ratio));
+
+  targetScale=next;
+  targetTx=sx-pinchWorldX*next;
+  targetTy=sy-pinchWorldY*next;
+  camera();
+}
+
+stage.addEventListener("touchstart",function(e){
+  if(e.target.closest(".node,.panel,.btn,.search")) return;
+  e.preventDefault();
+
+  if(e.touches.length===1){
+    drag=true;
+    pinchDistance=0;
+    lx=e.touches[0].clientX;
+    ly=e.touches[0].clientY;
+  }else if(e.touches.length>=2){
+    drag=false;
+    startPinch(e.touches[0],e.touches[1]);
+  }
+},{passive:false});
+
+stage.addEventListener("touchmove",function(e){
+  if(e.target.closest(".node,.panel,.btn,.search")) return;
+  e.preventDefault();
+
+  if(e.touches.length>=2 && pinchDistance){
+    updatePinch(e.touches[0],e.touches[1]);
+    return;
+  }
+
+  if(e.touches.length===1 && drag){
+    const x=e.touches[0].clientX;
+    const y=e.touches[0].clientY;
+    targetTx+=x-lx;
+    targetTy+=y-ly;
+    lx=x; ly=y;
+    camera();
+  }
+},{passive:false});
+
+stage.addEventListener("touchend",function(e){
+  e.preventDefault();
+
+  if(e.touches.length>=2){
+    startPinch(e.touches[0],e.touches[1]);
+  }else if(e.touches.length===1){
+    drag=true;
+    pinchDistance=0;
+    lx=e.touches[0].clientX;
+    ly=e.touches[0].clientY;
+  }else{
+    drag=false;
+    pinchDistance=0;
+  }
+},{passive:false});
+
+stage.addEventListener("touchcancel",function(){
+  drag=false;
+  pinchDistance=0;
+},{passive:false});
+
+// Desktop: drag + wheel.
+stage.addEventListener("mousedown",function(e){
+  if(e.target.closest(".node,.panel,.btn,.search")) return;
+  mouseDown=true;
+  mouseX=e.clientX;
+  mouseY=e.clientY;
+  stage.style.cursor="grabbing";
+});
+window.addEventListener("mousemove",function(e){
+  if(!mouseDown) return;
+  targetTx+=e.clientX-mouseX;
+  targetTy+=e.clientY-mouseY;
+  mouseX=e.clientX;
+  mouseY=e.clientY;
+  camera();
+});
+window.addEventListener("mouseup",function(){
+  mouseDown=false;
+  stage.style.cursor="";
+});
+
+stage.addEventListener("wheel",function(e){
+  e.preventDefault();
+  const r=stage.getBoundingClientRect();
+  zoom(Math.exp(-e.deltaY*.0012),e.clientX-r.left,e.clientY-r.top);
+},{passive:false});
+
+stage.style.touchAction="none";
+stage.style.overscrollBehavior="none";
+stage.style.userSelect="none";
+stage.style.webkitUserSelect="none";
+stage.style.webkitTouchCallout="none";
+
+document.getElementById("search").addEventListener("input",e=>{
+  const q=e.target.value.toLowerCase().trim();
+  document.querySelectorAll(".node").forEach(n=>{
+    const m=byId[n.dataset.id],txt=[m[2],m[3],...m[6]].join(" ").toLowerCase();
+    n.classList.toggle("hidden",!!q&&!txt.includes(q));
+  });
+});
+window.addEventListener("resize",fit);
+draw();
+function initialView(){
+  const r=stage.getBoundingClientRect();
+  targetScale=window.innerWidth<=700 ? .88 : .92;
+  targetTx=r.width/2-1400*targetScale;
+  targetTy=r.height/2-850*targetScale;
+  tx=targetTx;ty=targetTy;scale=targetScale;
+  world.style.transform=`translate3d(${tx}px,${ty}px,0) scale(${scale})`;
+}
+initialView();
+</script>
+<script id="v21-data">
+window.V21_DATA = {
+  game: {
+    title:"🎮 JOUER", subtitle:"Devenir plus fort sur Fortnite",
+    center:["🎮","DEVENIR PLUS FORT","Ton parcours joueur complet"],
+    days:[
+      ["day1","📅","JOUR 1","Réglages + mécanique",["Sensibilité","Touches","FPS","Crosshair","Échauffement"]],
+      ["day2","🎯","JOUR 2","Aim + précision",["Tracking","Flicks","Shotgun","AR","Micro-ajustements"]],
+      ["day3","🏗️","JOUR 3","Build / Edit",["Freebuild","Edits","Piece Control","Retakes","Fluidité"]],
+      ["day4","⚔️","JOUR 4","Combats",["Peeks","Boxfight","Aim + build","Dégâts","Décisions"]],
+      ["day5","🧠","JOUR 5","Game sense",["Rotation","Position","Zone","Loot","Priorités"]],
+      ["day6","🏆","JOUR 6","Ranked + performance",["Matchs sérieux","Review","Erreurs","Weakness Radar","Objectifs"]],
+      ["day7","🔥","JOUR 7","Test final",["Warm-up","3 à 5 matchs","Best Moments","Bilan","Plan semaine suivante"]]
+    ]
+  },
+  create: {
+    title:"🎬 CRÉER", subtitle:"Transformer tes parties en contenu",
+    center:["🎬","DEVENIR CRÉATEUR","Du clip à la publication"],
+    days:[
+      ["day1","💡","JOUR 1","Trouver des idées",["Idea Universe","Hooks","Tendances","Content DNA","Challenge Engine"]],
+      ["day2","🎥","JOUR 2","Capturer",["Clip Vault","Best Moments","Replay","Organisation","Sélection"]],
+      ["day3","✂️","JOUR 3","Monter",["CapCut","Cuts","Zooms","Impacts","Sous-titres"]],
+      ["day4","🪝","JOUR 4","Hook + rétention",["Hook Lab","0-3 secondes","Storytelling","Pacing","CTA"]],
+      ["day5","🎨","JOUR 5","Identité",["Covers","Branding","Couleurs","Typo","Template"]],
+      ["day6","📱","JOUR 6","Publier",["TikTok","Description","Hashtags","Horaire","Repurpose Engine"]],
+      ["day7","📊","JOUR 7","Analyser",["Analytics","Experiments","Rétention","Post-Mortem AI","Amélioration"]]
+    ]
+  },
+  learn: {
+    title:"📚 APPRENDRE", subtitle:"Maîtriser Creator Lab et progresser",
+    center:["📚","APPRENDRE","Formation + système de progression"],
+    days:[
+      ["day1","🧭","JOUR 1","Prise en main",["Creator Brain","Command Center","Game Hub","Profil","Recherche globale"]],
+      ["day2","🤖","JOUR 2","AI Coach",["AI Command Center","Recommandations","Weakness Radar","Coaching","Plans"]],
+      ["day3","🎓","JOUR 3","Academy",["Lessons","Learning Path","Cours","Quiz","Progression"]],
+      ["day4","🎯","JOUR 4","Missions + XP",["Quest System","Daily Quests","Achievement System","XP","Récompenses"]],
+      ["day5","📅","JOUR 5","Organisation",["Mission Control","Content Calendar","Master Roadmap","Smart Notifications","Gaming Session"]],
+      ["day6","💰","JOUR 6","Creator business",["Money Hub","Creator Toolbox","Link Center","Offres","Monétisation"]],
+      ["day7","🚀","JOUR 7","Creator OS",["Reports","Export/Import","Privacy","Themes","Mobile + Desktop"]]
+    ]
+  },
+  training: {
+    title:"🎯 TRAINING", subtitle:"Programme d'entraînement détaillé",
+    center:["🎯","TRAINING CENTER","Construire une vraie routine"],
+    days:[
+      ["d1","🔥","JOUR 1","Routine mécanique",["Warm-up 10 min","Edit 15 min","Freebuild 15 min"]],
+      ["d2","🎯","JOUR 2","Aim",["Tracking","Flicks","Shotgun","AR"]],
+      ["d3","🏗️","JOUR 3","Construction",["Build","Edit","Piece Control","Retakes"]],
+      ["d4","⚔️","JOUR 4","Fight",["Peeks","Boxfight","Angles","Timing"]],
+      ["d5","🧠","JOUR 5","Game sense",["Position","Rotation","Zone","Décisions"]],
+      ["d6","📈","JOUR 6","Correction",["Replay","Erreurs","Weakness Radar","Drills"]],
+      ["d7","🏆","JOUR 7","Test",["Warm-up","Matchs","Score","Bilan"]]
+    ]
+  },
+  matches: {
+    title:"🕹️ MATCHS", subtitle:"Journal et analyse de tes parties",
+    center:["🕹️","MATCH JOURNAL","Comprendre chaque partie"],
+    days:[
+      ["d1","📝","JOUR 1","Créer ton journal",["Mode","Kills","Placement","Dégâts"]],
+      ["d2","🔎","JOUR 2","Analyser",["Erreurs","Décisions","Moments clés","Deaths"]],
+      ["d3","🎯","JOUR 3","Objectifs",["1 objectif/match","Priorités","Mesure"]],
+      ["d4","🧠","JOUR 4","Game sense",["Rotations","Zones","Position"]],
+      ["d5","⚔️","JOUR 5","Combats",["Peeks","Timing","Damage trade"]],
+      ["d6","📊","JOUR 6","Stats",["Performance Engine","Progression","Score"]],
+      ["d7","🚀","JOUR 7","Bilan",["Best Moments","Worst Mistakes","Plan"]]
+    ]
+  },
+  performance: {
+    title:"📈 PERFORMANCE", subtitle:"Tes statistiques et ton amélioration",
+    center:["📈","PERFORMANCE ENGINE","Mesurer ce qui change"],
+    days:[
+      ["d1","📊","JOUR 1","Base",["K/D","Placement","Damage","Victoire"]],
+      ["d2","⏱️","JOUR 2","Régularité",["Sessions","Durée","Warm-up"]],
+      ["d3","🎯","JOUR 3","Combat",["Accuracy","Damage","Elims"]],
+      ["d4","🧠","JOUR 4","Décision",["Mistakes","Rotations","Timing"]],
+      ["d5","🔥","JOUR 5","Progression",["Scores","Comparaisons","Tendances"]],
+      ["d6","🚨","JOUR 6","Weakness Radar",["Faiblesses","Priorités","Drills"]],
+      ["d7","🏆","JOUR 7","Rapport",["Performance Report","Objectifs","Next step"]]
+    ]
+  },
+  clips: {
+    title:"✂️ CLIPS", subtitle:"Construire ta bibliothèque de moments",
+    center:["✂️","CLIP VAULT","Ne plus perdre un bon moment"],
+    days:[
+      ["d1","📥","JOUR 1","Collecter",["Clips","Replay","Import"]],
+      ["d2","🏷️","JOUR 2","Classer",["Kill","Win","Funny","Rare"]],
+      ["d3","⭐","JOUR 3","Sélectionner",["Top clips","Best Moments","Score"]],
+      ["d4","🎬","JOUR 4","Préparer",["Trim","Order","Hook"]],
+      ["d5","📱","JOUR 5","Short form",["9:16","Captions","Pacing"]],
+      ["d6","🚀","JOUR 6","Publier",["TikTok","CTA","Repurpose"]],
+      ["d7","📊","JOUR 7","Analyser",["Retention","Views","Learn"]]
+    ]
+  },
+  shorts: {
+    title:"📱 SHORTS", subtitle:"Créer des vidéos courtes qui retiennent",
+    center:["📱","SHORT FORM STUDIO","Clip → vidéo → publication"],
+    days:[
+      ["d1","🪝","JOUR 1","Hook Lab",["Hook","Curiosity","Text"]],
+      ["d2","🎬","JOUR 2","Storyboard",["Intro","Build-up","Payoff"]],
+      ["d3","✂️","JOUR 3","Montage",["Cuts","Zoom","Impact","Sound"]],
+      ["d4","💬","JOUR 4","Sous-titres",["Captions","Timing","Readability"]],
+      ["d5","🔥","JOUR 5","Rétention",["Pacing","Pattern break","Loop"]],
+      ["d6","📤","JOUR 6","Publication",["Cover","Description","CTA"]],
+      ["d7","📈","JOUR 7","Analyse",["Retention","Replays","Iteration"]]
+    ]
+  },
+  editing: {
+    title:"🎨 MONTAGE", subtitle:"Ton Editing Blueprint complet",
+    center:["🎨","EDITING LAB","Construire ton style"],
+    days:[
+      ["d1","✂️","JOUR 1","Cuts",["Cut on action","Rythme","Silences"]],
+      ["d2","💥","JOUR 2","Impacts",["Shake","Zoom","Flash","Hit"]],
+      ["d3","🔊","JOUR 3","Audio",["SFX","Music","Volume","Limiter"]],
+      ["d4","📝","JOUR 4","Texte",["Font","Position","Animation"]],
+      ["d5","🎨","JOUR 5","Style",["Colors","Vif","Branding"]],
+      ["d6","🎬","JOUR 6","Blueprint",["Template","Workflow","Export"]],
+      ["d7","🏆","JOUR 7","Projet final",["Montage complet","Cover","Review"]]
+    ]
+  },
+  academy: {
+    title:"🧠 ACADEMY", subtitle:"Cours et parcours guidés",
+    center:["🧠","CREATOR ACADEMY","Apprendre étape par étape"],
+    days:[
+      ["d1","📚","JOUR 1","Fondations",["Creator basics","Workflow"]],
+      ["d2","🎮","JOUR 2","Fortnite",["Mechanics","Game sense"]],
+      ["d3","🎬","JOUR 3","Content",["Clips","Shorts"]],
+      ["d4","📱","JOUR 4","TikTok",["Hooks","Retention"]],
+      ["d5","📊","JOUR 5","Analytics",["Metrics","Experiments"]],
+      ["d6","💰","JOUR 6","Creator business",["Offers","Monetization"]],
+      ["d7","🚀","JOUR 7","Certification",["Final project","Review"]]
+    ]
+  },
+  media: {
+    title:"🌐 MEDIA", subtitle:"Ressources, inspirations et références",
+    center:["🌐","MEDIA CENTER","Trouver quoi regarder et apprendre"],
+    days:[
+      ["d1","🎥","JOUR 1","Références",["Clips","Creators","Formats"]],
+      ["d2","🔥","JOUR 2","Tendances",["TikTok","Formats","Hooks"]],
+      ["d3","🎵","JOUR 3","Audio",["Musiques","SFX","Trends"]],
+      ["d4","🎨","JOUR 4","Visuels",["Covers","Styles","Fonts"]],
+      ["d5","🧠","JOUR 5","Analyse",["Pourquoi ça marche","Structure"]],
+      ["d6","💡","JOUR 6","Inspirations",["Ideas","Remix","Challenge"]],
+      ["d7","🚀","JOUR 7","Bibliothèque",["Save","Tag","Organize"]]
+    ]
+  },
+  quests: {
+    title:"🏆 QUÊTES", subtitle:"Missions, XP et récompenses",
+    center:["🏆","QUEST SYSTEM","Transformer les progrès en défis"],
+    days:[
+      ["d1","🎯","JOUR 1","Quêtes faciles",["Warm-up","1 clip","1 match"]],
+      ["d2","🔥","JOUR 2","Quêtes combat",["Elims","Damage","Win"]],
+      ["d3","🎬","JOUR 3","Quêtes création",["Clip","Short","Cover"]],
+      ["d4","📚","JOUR 4","Quêtes apprentissage",["Lesson","Quiz","Practice"]],
+      ["d5","⚡","JOUR 5","XP",["XP","Streak","Daily"]],
+      ["d6","🏅","JOUR 6","Achievements",["Badges","Milestones"]],
+      ["d7","👑","JOUR 7","Challenge final",["Master Quest","Reward","Next level"]]
+    ]
+  }
+};
+</script>
+
+<style>
+#fc33{position:fixed;inset:0;z-index:999999;display:none;background:#070812;color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+#fc33.on{display:block}
+.fc33bar{height:70px;display:flex;align-items:center;gap:12px;padding:0 16px;background:rgba(7,8,18,.94);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px)}
+.fc33back{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;border-radius:13px;padding:10px 15px;font-weight:900;cursor:pointer}
+.fc33back:hover{background:rgba(111,91,255,.24)}
+.fc33title{flex:1;font-weight:950}.fc33tag{font-size:11px;color:#aeb5ff;border:1px solid rgba(120,105,255,.25);background:rgba(100,85,255,.12);padding:7px 10px;border-radius:999px}
+.fc33scroll{height:calc(100% - 70px);overflow:auto;padding:30px 16px 60px}.fc33wrap{max-width:1200px;margin:auto}
+.fc33hero{text-align:center;max-width:900px;margin:0 auto 25px}.fc33ey{font-size:11px;color:#9299ff;font-weight:950;letter-spacing:1.8px;text-transform:uppercase}.fc33hero h1{font-size:clamp(30px,5vw,58px);margin:8px 0 10px;line-height:1.04}.fc33hero p{color:#aeb4c8;line-height:1.6;margin:0}
+.fc33tree{display:flex;justify-content:center;margin:10px auto 30px}.fc33center{width:min(480px,94vw);padding:20px;border-radius:23px;text-align:center;background:linear-gradient(145deg,rgba(103,82,255,.28),rgba(15,18,36,.95));border:1px solid rgba(142,126,255,.48);box-shadow:0 25px 80px rgba(70,52,220,.18)}.fc33center .ico{font-size:35px}.fc33center h2{margin:7px 0 4px}.fc33center small{color:#9ca3b9}
+.fc33grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.fc33card{position:relative;min-height:145px;text-align:left;padding:17px;border-radius:19px;background:rgba(16,19,36,.94);border:1px solid rgba(255,255,255,.09);color:#fff;cursor:pointer;box-shadow:0 14px 38px rgba(0,0,0,.25);transition:.16s}.fc33card:hover{transform:translateY(-3px);border-color:rgba(130,111,255,.65);box-shadow:0 20px 50px rgba(76,57,220,.2)}.fc33num{font-size:10px;color:#949bff;font-weight:950;letter-spacing:1.2px}.fc33card h3{font-size:17px;margin:7px 0 7px}.fc33card p{font-size:12px;color:#a1a7ba;line-height:1.5;margin:0}.fc33go{position:absolute;right:14px;bottom:12px;color:#858cff;font-weight:950}
+.fc33info{max-width:900px;margin:0 auto}.fc33section{background:rgba(16,19,36,.9);border:1px solid rgba(255,255,255,.08);border-radius:19px;padding:20px;margin:12px 0}.fc33section h2{margin:0 0 9px}.fc33section p,.fc33section li{color:#b4bacb;line-height:1.65}.fc33section ul{padding-left:20px}.fc33tools{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.fc33tool{padding:15px;border-radius:15px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}.free{color:#67e6a3;font-weight:900}.paid{color:#ffc86b;font-weight:900}.fc33check{display:inline-block;padding:6px 9px;border-radius:999px;background:rgba(103,230,163,.1);color:#67e6a3;font-size:11px;font-weight:900;margin:3px}
+.fc33card.done{opacity:.72;border-color:rgba(103,230,163,.42);background:rgba(55,120,85,.10)}
+.fc33card.done h3{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:#67e6a3}
+.fc33done{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:900;color:#67e6a3;z-index:2}
+.fc33done input{width:17px;height:17px;accent-color:#67e6a3;cursor:pointer}
+.fc33video{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(255,0,70,.12),rgba(110,80,255,.12));border:1px solid rgba(255,255,255,.09)}
+.fc33videos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.fc33video{display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(255,0,70,.11),rgba(110,80,255,.10));border:1px solid rgba(255,255,255,.09);color:#fff;text-decoration:none;transition:transform .18s ease,border-color .18s ease,background .18s ease}.fc33video:hover{transform:translateY(-2px);border-color:rgba(255,80,130,.5);background:linear-gradient(135deg,rgba(255,0,70,.18),rgba(110,80,255,.16))}.fc33video .vnum{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#ff1744;font-weight:950;flex:none}.fc33video .vbody{display:grid;gap:4px;min-width:0}.fc33video .vbody b{font-size:13px}.fc33video .vbody span{font-size:11px;color:#aeb4c8}.fc33video .varrow{margin-left:auto;font-size:25px;color:#ff6688}.fc33video a{all:unset}
+.fc33video a{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:#ff1744;color:#fff;text-decoration:none;font-weight:900;white-space:nowrap}
+.fc33video a:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.fc33status{margin-top:10px;color:#67e6a3;font-weight:900;font-size:12px}
+
+@media(max-width:900px){.fc33grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.fc33bar{height:64px;padding:0 10px}.fc33scroll{height:calc(100% - 64px);padding:22px 12px 45px}.fc33grid,.fc33tools{grid-template-columns:1fr}.fc33tag{display:none}.fc33title{font-size:14px}.fc33card{min-height:128px}}
+</style>
+<div id="fc33" aria-hidden="true">
+  <div class="fc33bar"><button class="fc33back" id="fc33Back">← Retour</button><div class="fc33title" id="fc33Title">FORMATION</div><div class="fc33tag">ARBRE • FORMATION</div></div>
+  <div class="fc33scroll"><div class="fc33wrap" id="fc33Content"></div></div>
+</div>
+<script>
+(function(){
+ const root=document.getElementById('fc33'),content=document.getElementById('fc33Content'),title=document.getElementById('fc33Title'),back=document.getElementById('fc33Back');
+ const history=[]; let state=null; let down=null;
+ const tools={
+  editing:[['CapCut','Gratuit de base','Découpage, texte, sous-titres, effets, audio et export.'],['DaVinci Resolve','Gratuit + Studio payant','Montage, couleur, VFX, motion graphics et audio.']],
+  shorts:[['CapCut','Gratuit de base','Simple pour commencer sur mobile ou PC.'],['Canva','Gratuit + options payantes','Utile pour couvertures, textes et éléments visuels.']],
+  clips:[['CapCut','Gratuit de base','Pour transformer rapidement un clip en Short.'],['DaVinci Resolve','Gratuit + Studio payant','Pour un montage PC plus poussé.']],
+  create:[['CapCut','Gratuit de base','Montage rapide et création verticale.'],['Canva','Gratuit + options payantes','Covers et éléments graphiques.']],
+  media:[['Photopea','Gratuit dans le navigateur','Retouches et visuels simples.'],['Canva','Gratuit + options payantes','Miniatures et visuels.']]
+ };
+ const fallback={icon:'🌳',title:'PARCOURS',desc:'Parcours guidé',days:[]};
+ function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+ function open(){root.classList.add('on');root.setAttribute('aria-hidden','false');}
+ function close(){root.classList.remove('on');root.setAttribute('aria-hidden','true');history.length=0;state=null;}
+ function branch(key){const d=window.V21_DATA?.[key]; if(!d)return fallback; const days=(d.days||[]).map(x=>({id:x[0],icon:x[1],name:x[2],title:x[3],items:x[4]||[]})); return {icon:d.center?.[0]||'🌳',title:d.center?.[1]||d.title,desc:d.subtitle||d.center?.[2]||'',days};}
+ function push(){if(state)history.push({...state});}
+ function showDays(key,pushIt=true){if(pushIt)push(); const d=branch(key);state={type:'days',key};title.textContent=d.icon+' '+d.title;open();content.innerHTML=`<div class="fc33hero"><div class="fc33ey">DEUXIÈME ARBRE</div><h1>${esc(d.icon)} ${esc(d.title)}</h1><p>${esc(d.desc)}<br>Chaque carte est une étape. Clique dessus pour ouvrir son propre arbre d'actions.</p></div><div class="fc33tree"><div class="fc33center"><div class="ico">${esc(d.icon)}</div><h2>${esc(d.title)}</h2><small>${d.days.length} étapes reliées à ton parcours</small></div></div><div class="fc33grid">${d.days.map((x,i)=>`<button class="fc33card" data-v33="day" data-i="${i}"><div class="fc33num">ÉTAPE ${i+1}</div><h3>${esc(x.icon)} ${esc(x.title)}</h3><p>${esc(x.items.slice(0,3).join(' • '))}</p><span class="fc33go">Entrer →</span></button>`).join('')}</div>`;}
+ function showTasks(key,i,pushIt=true){if(pushIt)push(); const d=branch(key),day=d.days[i]||d.days[0]; state={type:'tasks',key,i}; title.textContent=day.icon+' '+day.title; content.innerHTML=`<div class="fc33hero"><div class="fc33ey">TROISIÈME ARBRE</div><h1>${esc(day.icon)} ${esc(day.title)}</h1><p>${esc(day.name)} — voici les actions concrètes à faire une par une.</p></div><div class="fc33tree"><div class="fc33center"><div class="ico">🎯</div><h2>${esc(day.title)}</h2><small>${day.items.length} actions à réaliser</small></div></div><div class="fc33grid">${day.items.map((x,j)=>`<button class="fc33card ${isDone(key,i,j)?'done':''}" data-v33="task" data-i="${j}"><label class="fc33done" onclick="event.stopPropagation()"><input data-done type="checkbox" ${isDone(key,i,j)?'checked':''} onchange="toggleDone('${key}',${i},${j},this.checked)"><span>Fait</span></label><div class="fc33num">ACTION ${j+1}</div><h3>${esc(x)}</h3><p>Clique pour voir les bases, la méthode, les erreurs à éviter et les outils.</p><span class="fc33go">Voir →</span></button>`).join('')}</div>`;}
+ function doneKey(key,i,j){return `fclab_done_${key}_${i}_${j}`;}
+ function isDone(key,i,j){return localStorage.getItem(doneKey(key,i,j))==='1';}
+ function setDone(key,i,j,value){if(value)localStorage.setItem(doneKey(key,i,j),'1');else localStorage.removeItem(doneKey(key,i,j));}
+ function refreshDoneCards(){
+   content.querySelectorAll('[data-v33="task"]').forEach(c=>{const j=Number(c.dataset.i),d=isDone(state.key,state.i,j);c.classList.toggle('done',d);const cb=c.querySelector('input[data-done]');if(cb)cb.checked=d;});
+ }
+ function toggleDone(key,i,j,value){setDone(key,i,j,value); refreshDoneCards(); const cb=document.querySelector('#fc33Done'); if(cb)cb.checked=value; const st=document.querySelector('#fc33DoneStatus'); if(st)st.textContent=value?'✓ Étape terminée — sauvegardée automatiquement sur cet appareil.':'Étape non terminée — tu peux la recocher quand tu veux.';}
+ function youtubeFor(key,task){
+   const t=task.toLowerCase();
+   const q=(label,query)=>[label,'https://www.youtube.com/results?search_query='+encodeURIComponent(query)];
+   if(key==='editing'||/montage|logiciel|timeline|couper|rythm|sous-titre|texte|transition|effet|audio|son|export|capcut|davinci/.test(t)){
+     return [
+       ['🎬 CapCut — apprendre le montage','https://www.youtube.com/results?search_query='+encodeURIComponent('CapCut montage débutant français')],
+       ['🎮 Montage Fortnite sur CapCut','https://www.youtube.com/results?search_query='+encodeURIComponent('Fortnite montage CapCut français')],
+       ['✂️ Cuts et rythme','https://www.youtube.com/results?search_query='+encodeURIComponent('CapCut couper clips rythme montage français')],
+       ['💬 Sous-titres automatiques','https://www.youtube.com/results?search_query='+encodeURIComponent('CapCut sous titres automatiques français')],
+       ['✨ Effets et transitions','https://www.youtube.com/results?search_query='+encodeURIComponent('CapCut effets transitions gaming français')],
+       ['🎨 DaVinci Resolve débutant','https://www.youtube.com/results?search_query='+encodeURIComponent('DaVinci Resolve débutant montage français')]
+     ];
+   }
+   if(key==='training'||key==='game'||/aim|visée|edit|construction|build|mécanique|entraînement|routine|échauffement/.test(t)) return [
+     q('🎯 AIM — entraînement Fortnite','Fortnite entraînement aim visée français'),
+     q('✏️ EDIT — entraînement edits','Fortnite entraînement edit map français'),
+     q('🏗️ BUILD — construction rapide','Fortnite entraînement build français'),
+     q('🎮 Piece Control','Fortnite piece control entraînement français'),
+     q('⚡ Routine quotidienne','Fortnite routine entraînement pro français'),
+     q('🧠 Mécaniques et conseils','Fortnite mécaniques conseils progresser français')
+   ];
+   if(key==='shorts'||/short|hook|rétention|publier|publication|vertical/.test(t)) return [
+     q('📱 Créer un Short Fortnite','Fortnite Shorts créer montage CapCut français'),
+     q('🪝 Trouver un bon hook','YouTube Shorts hook rétention français'),
+     q('✂️ Montage vertical','montage vidéo vertical Shorts CapCut français'),
+     q('💬 Sous-titres Shorts','CapCut sous titres Shorts français'),
+     q('📈 Rétention et statistiques','YouTube Shorts rétention analytics français'),
+     q('🚀 Publier un Short','YouTube Shorts publier débutant français')
+   ];
+   if(key==='clips'||/clip|coffre|sélection|moment/.test(t)) return [
+     q('🎥 Créer des clips Fortnite','Fortnite clip montage débutant français'),
+     q('✂️ Monter un clip','montage clip Fortnite CapCut français'),
+     q('🔥 Montage highlight','Fortnite highlights montage français'),
+     q('🎵 Synchroniser avec la musique','Fortnite montage musique sync CapCut français'),
+     q('📱 Transformer un clip en Short','Fortnite clip Short vertical français'),
+     q('📁 Organiser ses clips','organiser clips Fortnite créateur français')
+   ];
+   if(key==='media'||/image|miniature|thumbnail|visuel|photo/.test(t)) return [
+     q('🖼️ Faire une miniature Fortnite','miniature Fortnite Canva tutoriel français'),
+     q('🎨 Miniature avec Canva','Canva miniature YouTube gaming français'),
+     q('🧩 Miniature avec Photoshop','Photoshop miniature gaming débutant français'),
+     q('⚡ Miniature rapide','créer miniature gaming rapidement français'),
+     q('📐 Composition et texte','miniature YouTube composition texte français'),
+     q('🎮 Miniatures Fortnite','Fortnite thumbnail tutorial français')
+   ];
+   if(key==='create'||/idée|contenu|créateur|création|story|storyboard|calendrier/.test(t)) return [
+     q('💡 Trouver des idées','idées contenu Fortnite TikTok YouTube français'),
+     q('🪝 Faire un bon hook','hook TikTok gaming français'),
+     q('📖 Storytelling gaming','storytelling gaming YouTube français'),
+     q('📝 Faire un storyboard','storyboard vidéo gaming débutant français'),
+     q('📅 Calendrier de contenu','calendrier contenu TikTok YouTube gaming français'),
+     q('♻️ Recycler un contenu','repurpose contenu TikTok YouTube Shorts français')
+   ];
+   if(key==='performance'||/performance|stat|statistique|analyse|review|faiblesse|erreur|amélioration/.test(t)) return [
+     q('📊 Analyser ses statistiques','YouTube Analytics débutant français'),
+     q('🎮 Analyser une partie Fortnite','Fortnite analyse partie review VOD français'),
+     q('🔎 Trouver ses erreurs','Fortnite VOD review erreurs français'),
+     q('📈 Améliorer ses performances','Fortnite progresser analyse gameplay français'),
+     q('🧠 VOD review','Fortnite VOD review tutoriel français'),
+     q('🎯 Identifier ses points faibles','Fortnite identifier erreurs progresser français')
+   ];
+   if(key==='matches'||/match|partie|vod|replay/.test(t)) return [
+     q('🎥 Utiliser les replays Fortnite','Fortnite replay mode tutoriel français'),
+     q('🔍 Analyser une VOD','Fortnite VOD review français'),
+     q('🎯 Analyser ses fights','Fortnite analyse fights français'),
+     q('🧠 Comprendre ses décisions','Fortnite game sense analyse français'),
+     q('📊 Faire une review de partie','Fortnite review partie français'),
+     q('🏆 Analyse compétitive','Fortnite compétitif analyse partie français')
+   ];
+   return [q('🔎 Chercher cette formation sur YouTube',task+' tutoriel français'),q('🎮 Tutoriel Fortnite',task+' Fortnite français'),q('📚 Guide débutant',task+' guide débutant français')];
+ }
+ function info(key,i,j,pushIt=true){
+  if(pushIt)push();
+  const d=branch(key),day=d.days[i]||d.days[0],task=day.items[j]||'Action';
+  state={type:'info',key,i,j}; title.textContent='📖 '+task; window.__FC38_CURRENT={key,i,j};
+  const tl=task.toLowerCase();
+  const data = detailFor(key, day, task);
+  const toolsHtml = data.tools?.length ? `<div class="fc33section"><h2>🛠️ Outils à utiliser</h2><div class="fc33tools">${data.tools.map(t=>`<div class="fc33tool"><b>${esc(t[0])}</b><p><span class="${t[1]==='PAYANT'?'paid':'free'}">${esc(t[1])}</span><br>${esc(t[2])}</p></div>`).join('')}</div></div>` : '';
+  content.innerHTML=`<div class="fc33hero"><div class="fc33ey">FORMATION • ${esc(day.title)}</div><h1>${esc(task)}</h1><p>${esc(data.intro)}</p></div><div class="fc33info">
+    <div class="fc33section"><h2>🎯 Objectif</h2><p>${esc(data.goal)}</p></div>
+    <div class="fc33section"><h2>📚 Cours</h2><p>${esc(data.course)}</p></div>
+    <div class="fc33section"><h2>🪜 Étapes à suivre</h2><ol>${data.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>
+    ${toolsHtml}
+    <div class="fc33section"><h2>⚠️ Erreurs à éviter</h2><ul>${data.mistakes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div class="fc33section"><h2>🏋️ Exercice pratique</h2><p>${esc(data.exercise)}</p></div>
+    <div class="fc33section"><h2>✅ Checklist de cette action</h2><div class="fc38checklist">${data.check.map((x,k)=>`<label class="fc38check"><input type="checkbox" data-mini-check="${k}" onchange="fc38MiniCheck('${key}',${i},${j},${k},this.checked)"><span>${esc(x)}</span></label>`).join('')}</div></div>
+    <div class="fc33section"><h2>📺 Vidéos pour t'aider</h2><p style="color:#aeb4c8;margin-top:-4px">J’ai mis plusieurs recherches/tutoriels pour que tu puisses choisir celui qui t’explique le mieux. Clique sur une vidéo, regarde-la, puis reviens cocher ton étape.</p><div class="fc33videos">${youtubeFor(key,task).map((v,n)=>`<a class="fc33video" href="${v[1]}" target="_blank" rel="noopener noreferrer"><div class="vnum">${n+1}</div><div class="vbody"><b>${esc(v[0])}</b><span>Ouvrir sur YouTube ↗</span></div><div class="varrow">›</div></a>`).join('')}</div></div>
+    <div class="fc33section"><h2>☑️ Suivi de progression</h2><label style="display:flex;align-items:center;gap:12px;font-weight:900;cursor:pointer"><input id="fc33Done" type="checkbox" style="width:22px;height:22px;accent-color:#67e6a3;cursor:pointer" ${isDone(key,i,j)?'checked':''} onchange="toggleDone('${key}',${i},${j},this.checked)"><span>J'ai terminé cette étape</span></label><div id="fc33DoneStatus" class="fc33status">${isDone(key,i,j)?'✓ Étape terminée — sauvegardée automatiquement sur cet appareil.':'Étape non terminée — tu peux la cocher quand tu veux.'}</div></div>
+    <div class="fc33section"><h2>🚀 Niveau supérieur</h2><p>${esc(data.next)}</p></div>
+  </div>`; if(window.fc38UpdateMiniChecks)window.fc38UpdateMiniChecks();
+ }
+ function detailFor(key,day,task){
+  const t=task.toLowerCase();
+  const base={
+   intro:`Tu vas apprendre « ${task} » avec une méthode simple, concrète et répétable. Le but est de savoir quoi faire, dans quel ordre et comment vérifier ton résultat.`,
+   goal:`Réussir cette action seul, sans improviser à chaque tentative, puis être capable de la refaire rapidement.`,
+   course:`Commence par comprendre le résultat attendu. Ensuite, réalise l'action lentement, vérifie ce qui ne va pas, corrige une seule chose à la fois et recommence. Une bonne formation ne consiste pas seulement à regarder : il faut pratiquer.`,
+   steps:[`Lis l'objectif et prépare ton projet, ta partie ou tes fichiers.`,`Fais un premier essai sans chercher la vitesse.`,`Compare le résultat avec ce que tu voulais obtenir.`,`Corrige le point le plus important.`,`Refais l'action plusieurs fois jusqu'à obtenir un résultat régulier.`,`Note ce qui fonctionne pour pouvoir le reproduire plus tard.`],
+   mistakes:[`Vouloir tout améliorer en même temps.`,`Passer à l'étape suivante sans vérifier le résultat.`,`Copier une méthode sans comprendre pourquoi elle fonctionne.`,`Négliger la qualité finale ou la lisibilité.`],
+   exercise:`Fais 3 essais. Après chaque essai, note une seule chose réussie et une seule chose à améliorer. Au troisième essai, cherche surtout la régularité.`,
+   check:['Objectif compris','Premier essai fait','Erreur repérée','Correction faite','Résultat vérifié'],
+   next:`Quand cette action devient facile, ajoute une contrainte : moins de temps, meilleur rendu, ou une situation plus difficile.`,tools:[]
+  };
+  if(key==='editing'||/montage|logiciel|clip|import|timeline|couper|rythm|sous-titre|texte|transition|effet|audio|son|export|davinci|capcut/.test(t)){
+   base.tools=[['CapCut','GRATUIT DE BASE','Très pratique pour débuter : importation, timeline, découpage, texte, sous-titres, effets, audio et export.'],['DaVinci Resolve','GRATUIT + STUDIO PAYANT','Option PC plus complète pour le montage, la couleur, les effets, les animations et l audio.'],['Canva','GRATUIT + OPTIONS PAYANTES','Utile pour créer une miniature, un écran de fin ou des éléments graphiques.']];
+  }
+  if(key==='shorts'||/short|hook|rétention|publier|publication|vertical/.test(t)){
+   base.tools=[['CapCut','GRATUIT DE BASE','Montage vertical rapide, texte, sous-titres, effets et audio.'],['Canva','GRATUIT + OPTIONS PAYANTES','Miniatures, éléments graphiques et identité visuelle.']];
+   base.steps=[`Travaille en vertical 9:16.`,`Mets l'information ou l'action la plus intéressante dès le début.`,`Supprime les blancs et les répétitions.`,`Ajoute des sous-titres grands et lisibles.`,`Utilise les effets seulement lorsqu'ils renforcent l'action.`,`Regarde la vidéo une dernière fois comme si tu étais un spectateur qui ne te connaît pas.`];
+   base.mistakes=['Intro trop longue','Texte minuscule ou placé sous les boutons de l’application','Trop d’effets qui cachent le gameplay','Fin sans conclusion ou sans raison de regarder jusqu’au bout'];
+   base.check=['Format 9:16','Début accrocheur','Aucun temps mort','Sous-titres lisibles','Audio propre','Export vérifié'];
+  }
+  if(key==='training'||key==='game'||/aim|visée|edit|construction|build|mécanique|mécaniques|entraînement|routine|échauffement/.test(t)){
+   base.goal='Transformer une compétence Fortnite précise en automatisme grâce à des répétitions courtes et mesurables.';
+   base.steps=['Choisis UNE compétence : aim, edits, build, mouvement, placement ou prise de décision.','Fais 5 minutes d’échauffement facile.','Travaille ensuite l’exercice principal pendant 10 à 15 minutes.','Augmente progressivement la difficulté.','Teste la compétence en partie réelle.','Après la partie, note une erreur précise à corriger demain.'];
+   base.exercise='Fais une session de 20 minutes : 5 minutes d’échauffement + 10 minutes de répétition ciblée + 5 minutes de test en partie.';
+   base.check=['Compétence choisie','Échauffement','Répétitions','Test en partie','Erreur notée'];
+  }
+  if(key==='performance'||/performance|stat|statistique|analyse|review|faiblesse|erreur|amélioration/.test(t)){
+   base.goal='Transformer tes résultats de jeu en informations utiles pour savoir exactement quoi travailler ensuite.';
+   base.steps=['Regarde tes dernières parties ou tes statistiques.','Repère les situations qui reviennent souvent.','Classe chaque erreur : mécanique, décision, positionnement, mental ou communication.','Choisis la catégorie qui revient le plus.','Crée un exercice directement lié à cette faiblesse.','Compare tes résultats après plusieurs sessions.'];
+   base.mistakes=['Changer d’objectif après chaque mauvaise partie','Se baser uniquement sur le nombre de kills','Chercher un coupable au lieu d’identifier une situation précise','Ne pas comparer plusieurs parties'];
+  }
+  if(key==='matches'||/match|partie|review|vod|replay/.test(t)){
+   base.goal='Apprendre à analyser une partie sans seulement regarder si tu as gagné ou perdu.';
+   base.steps=['Choisis une partie récente.','Repère les moments importants : début, rotations, fights et fin.','Mets pause juste avant les décisions importantes.','Demande-toi quelles autres options étaient possibles.','Note trois décisions à garder et une décision à corriger.','Transforme la correction en exercice pour la prochaine session.'];
+  }
+  if(key==='clips'||/clip|vault|coffre|sélection|moment/.test(t)){
+   base.goal='Construire une réserve de clips faciles à retrouver et à transformer en vidéos.';
+   base.steps=['Enregistre les moments intéressants.','Donne un nom clair au clip.','Classe-le par type : clutch, aim, build, drôle, fail, etc.','Supprime les clips inutiles.','Ajoute éventuellement une note sur le meilleur passage.','Garde les meilleurs clips pour les futurs Shorts.'];
+   base.check=['Clip sauvegardé','Nom clair','Catégorie','Moment repéré','Prêt pour montage'];
+  }
+  if(key==='media'||/image|miniature|thumbnail|visuel|photo|asset/.test(t)){
+   base.goal='Créer des visuels propres et cohérents avec ton identité de créateur.';
+   base.steps=['Choisis une image principale claire.','Garde un sujet facilement identifiable.','Ajoute un texte court et très lisible.','Utilise peu de polices et de couleurs.','Vérifie le rendu sur téléphone.','Exporte en bonne qualité et garde le fichier source.'];
+   base.tools=[['Canva','GRATUIT + OPTIONS PAYANTES','Création rapide de miniatures, affiches et éléments visuels.'],['Photopea','GRATUIT DANS LE NAVIGATEUR','Retouche d’images et travail par calques sans installation.']];
+  }
+  if(key==='create'||/idée|contenu|créateur|création|story|storyboard|calendrier/.test(t)){
+   base.goal='Passer d’une idée vague à un contenu concret avec un début, un milieu et une fin.';
+   base.steps=['Écris l’idée en une phrase.','Définis ce que le spectateur doit ressentir ou apprendre.','Écris le hook.','Liste les plans ou actions nécessaires.','Monte une première version courte.','Publie ou garde-la comme brouillon puis note ce que tu améliorerais.'];
+   base.check=['Idée en une phrase','Hook','Plans listés','Montage','Vérification finale'];
+  }
+  if(key==='academy'||key==='learn'||/cours|apprendre|formation|théorie|base/.test(t)){
+   base.goal='Construire progressivement tes connaissances au lieu de regarder des tutoriels sans les appliquer.';
+   base.steps=['Choisis une notion précise.','Apprends la théorie pendant quelques minutes.','Passe immédiatement à un exercice.','Teste la notion dans une situation réelle.','Explique avec tes propres mots ce que tu as appris.','Reviens dessus quelques jours plus tard.'];
+  }
+  if(key==='quests'||/quête|mission|défi|challenge|objectif|xp/.test(t)){
+   base.goal='Transformer ton entraînement en petites missions motivantes et mesurables.';
+   base.steps=['Choisis un objectif réaliste.','Définis une condition de réussite mesurable.','Fixe une durée ou un nombre d’essais.','Réalise la mission sans changer d’objectif.','Valide le résultat.','Augmente légèrement la difficulté pour la prochaine mission.'];
+   base.check=['Mission définie','Condition mesurable','Essais réalisés','Mission validée','Difficulté suivante'];
+  }
+  return base;
+ }
+ function keyFromNode(n){return n?.dataset?.id||'';}
+ function openNode(n){const key=keyFromNode(n); if(!window.V21_DATA?.[key])return; n.classList.add('active'); showDays(key,false);}
+ document.getElementById('nodes').addEventListener('pointerdown',e=>{const n=e.target.closest('.node');if(!n)return;down={x:e.clientX,y:e.clientY,n};});
+ document.getElementById('nodes').addEventListener('pointerup',e=>{const n=e.target.closest('.node');if(!n||!down||down.n!==n)return;const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(moved<10){e.preventDefault();e.stopPropagation();openNode(n);}});
+ document.getElementById('nodes').addEventListener('click',e=>{const n=e.target.closest('.node');if(!n)return;e.preventDefault();e.stopPropagation();openNode(n);});
+ content.addEventListener('click',e=>{if(e.target.closest('.fc33done'))return;const c=e.target.closest('[data-v33]');if(!c)return;const i=Number(c.dataset.i);if(state.type==='days'&&c.dataset.v33==='day')showTasks(state.key,i,true);else if(state.type==='tasks'&&c.dataset.v33==='task')info(state.key,state.i,i,true);});
+ back.addEventListener('click',()=>{if(!history.length){close();return;}const p=history.pop();if(p.type==='days')showDays(p.key,false);else if(p.type==='tasks')showTasks(p.key,p.i,false);else if(p.type==='info')info(p.key,p.i,p.j,false);});
+})();
+</script>
+
+
+
+<script id="fcl-welcome-script">
+(function(){
+  const legalKey='fclab_legal_accepted_v1';
+  const welcomeKey='fclab_welcome_seen_v1';
+
+  const gate=document.getElementById('fcl-legal-gate');
+  const checks=[...document.querySelectorAll('[data-legal-check]')];
+  const accept=document.getElementById('fcl-legal-accept');
+
+  function updateAccept(){
+    accept.disabled=!checks.every(c=>c.checked);
+  }
+  checks.forEach(c=>c.addEventListener('change',updateAccept));
+
+  function showGate(){
+    gate.classList.remove('hidden');
+    document.body.style.overflow='hidden';
+    setTimeout(()=>checks[0]?.focus(),30);
+  }
+  function hideGate(){
+    gate.classList.add('hidden');
+    try{localStorage.setItem(legalKey,'1')}catch(e){}
+  }
+
+  let legalAccepted=false;
+  try{legalAccepted=localStorage.getItem(legalKey)==='1'}catch(e){}
+  if(legalAccepted) gate.classList.add('hidden');
+
+  accept.addEventListener('click',()=>{
+    if(accept.disabled)return;
+    hideGate();
+    showWelcomeIfNeeded();
+  });
+
+  function showWelcome(){
+    const screen=document.getElementById('fcl-welcome');
+    const start=document.getElementById('fcl-welcome-start');
+    if(!screen||!start)return;
+    screen.classList.add('show');
+    document.body.style.overflow='hidden';
+    setTimeout(()=>start.focus(),30);
+    start.addEventListener('click',()=>{
+      screen.classList.remove('show');
+      document.body.style.overflow='';
+      try{localStorage.setItem(welcomeKey,'1')}catch(e){}
+    },{once:true});
+  }
+
+  function showWelcomeIfNeeded(){
+    let seen=false;
+    try{seen=localStorage.getItem(welcomeKey)==='1'}catch(e){}
+    if(!seen)setTimeout(showWelcome,150);
+  }
+
+  if(legalAccepted) showWelcomeIfNeeded();
+})();
+</script>
+
+<script id="fc38-features">
+(function(){
+ const KEY_PREFIX='fclab_done_';
+ function allTasks(){
+   const out=[]; const data=window.V21_DATA||{};
+   Object.entries(data).forEach(([key,d])=>{(d.days||[]).forEach((day,i)=>{(day[4]||[]).forEach((task,j)=>out.push({key,i,j,task,day:day[3]||day[2]}));});});
+   return out;
+ }
+ function done(x){return localStorage.getItem(`${KEY_PREFIX}${x.key}_${x.i}_${x.j}`)==='1'}
+ function miniKey(key,i,j,k){return `fclab_mini_${key}_${i}_${j}_${k}`}
+ window.fc38MiniCheck=function(key,i,j,k,v){if(v)localStorage.setItem(miniKey(key,i,j,k),'1');else localStorage.removeItem(miniKey(key,i,j,k));};
+ window.fc38UpdateMiniChecks=function(){document.querySelectorAll('[data-mini-check]').forEach((el,k)=>{const st=window.__FC38_CURRENT; if(!st)return; el.checked=localStorage.getItem(miniKey(st.key,st.i,st.j,k))==='1';});};
+ const btn=document.createElement('button');btn.className='fc38fab';btn.textContent='📊 Mon parcours';document.body.appendChild(btn);
+ const modal=document.createElement('div');modal.className='fc38modal';modal.innerHTML=`<div class="fc38box"><div class="fc38top"><div><span class="fc38pill">CREATOR LAB</span><h2 style="margin:7px 0 0">📊 Mon parcours</h2><p style="color:#aeb4c8;margin:5px 0">Ton avancement est enregistré automatiquement sur cet appareil.</p></div><button class="fc38close">×</button></div><div class="fc38stats"><div class="fc38stat"><small>Terminées</small><b id="fc38done">0</b></div><div class="fc38stat"><small>Total</small><b id="fc38total">0</b></div><div class="fc38stat"><small>Progression</small><b id="fc38pct">0%</b></div></div><div class="fc38bar"><div class="fc38fill" id="fc38fill"></div></div><h3>🔥 Session du jour</h3><div class="fc38session" id="fc38session"></div><div class="fc38quiz"><h3 style="margin-top:0">🧠 Mini-défi</h3><p id="fc38q">Choisis la meilleure habitude pour progresser.</p><button class="fc38btn" data-a="0">Tout travailler en même temps</button><button class="fc38btn" data-a="1">Choisir une compétence et la mesurer</button><button class="fc38btn" data-a="2">Regarder des vidéos sans pratiquer</button><p id="fc38result" style="font-weight:900"></p></div></div>`;document.body.appendChild(modal);
+ function refresh(){const a=allTasks(),n=a.filter(done).length,p=a.length?Math.round(n/a.length*100):0;document.getElementById('fc38done').textContent=n;document.getElementById('fc38total').textContent=a.length;document.getElementById('fc38pct').textContent=p+'%';document.getElementById('fc38fill').style.width=p+'%';
+   let candidates=a.filter(x=>!done(x)); if(!candidates.length)candidates=a; let items=candidates.slice(0,5); document.getElementById('fc38session').innerHTML=items.map((x,idx)=>`<label class="fc38item ${done(x)?'done':''}"><input type="checkbox" ${done(x)?'checked':''} data-session="${idx}"><span><b>${idx+1}. ${String(x.task).replace(/[&<>]/g,'')}</b><small style="display:block;color:#8f95a8">${String(x.day).replace(/[&<>]/g,'')}</small></span></label>`).join('');
+   document.querySelectorAll('[data-session]').forEach((el,idx)=>el.addEventListener('change',()=>{const x=items[idx]; if(el.checked)localStorage.setItem(`${KEY_PREFIX}${x.key}_${x.i}_${x.j}`,'1'); else localStorage.removeItem(`${KEY_PREFIX}${x.key}_${x.i}_${x.j}`);refresh();}));
+ }
+ btn.onclick=()=>{refresh();modal.style.display='flex'};modal.querySelector('.fc38close').onclick=()=>modal.style.display='none';modal.addEventListener('click',e=>{if(e.target===modal)modal.style.display='none'});
+ modal.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{document.getElementById('fc38result').textContent=b.dataset.a==='1'?'✅ Exactement : une compétence précise + une mesure + de la pratique.':'❌ Essaie plutôt de travailler une seule compétence à la fois.'});
+ window.addEventListener('storage',refresh);
+ setTimeout(refresh,300);
+ const oldOpen=window.openNode;
+ // Capture the current info state when the training view is rendered.
+ const observer=new MutationObserver(()=>{const title=document.getElementById('fc33Title');const h=document.querySelector('#fc33Content .fc33hero h1');if(title&&h&&/📖/.test(title.textContent)){const cards=[...document.querySelectorAll('#fc33Content .fc33card')];const checked=document.querySelector('#fc33Done');if(checked){const m=document.body.innerText.match(/FORMATION/);/* marker only */} }});
+ observer.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+</body>
+</html>
