@@ -262,20 +262,73 @@ button:focus-visible,input:focus-visible{outline:2px solid #28d7ff;outline-offse
 #simpleWelcome button{width:100%;padding:16px 20px;border:0;border-radius:14px;background:linear-gradient(90deg,#6d5dfc,#8b5cf6);color:#fff;font-weight:800;font-size:17px;cursor:pointer}
 </style>
 
-<style id="fcl-auth-style">
-#fcl-auth{position:fixed;inset:0;z-index:200000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(3,5,12,.86);backdrop-filter:blur(14px)}
-#fcl-auth.show{display:flex}
-.fcl-auth-card{width:min(440px,100%);padding:28px;border:1px solid #29324e;border-radius:22px;background:linear-gradient(180deg,#141a2c,#090d17);box-shadow:0 30px 100px #0009}
-.fcl-auth-card h2{margin:0 0 7px;font-size:26px}.fcl-auth-card p{color:#9da7c0;line-height:1.5;margin:0 0 18px}
-.fcl-auth-tabs{display:flex;gap:8px;margin-bottom:16px}.fcl-auth-tab{flex:1;padding:11px;border:1px solid #29324e;background:#0d1220;color:#fff;border-radius:11px;font-weight:800;cursor:pointer}.fcl-auth-tab.active{background:#765cff;border-color:#765cff}
-.fcl-auth-form{display:grid;gap:10px}.fcl-auth-form input{width:100%;height:44px;padding:0 12px;border:1px solid #29324e;border-radius:11px;background:#0b101b;color:#fff;outline:none}.fcl-auth-form input:focus{border-color:#28d7ff}
-.fcl-auth-submit{height:45px;border:0;border-radius:12px;background:linear-gradient(90deg,#765cff,#25cfee);color:#fff;font-weight:900;cursor:pointer;margin-top:3px}.fcl-auth-status{min-height:22px;margin-top:12px;font-size:13px;color:#aeb7d0}.fcl-auth-close{float:right;border:0;background:#ffffff10;color:#fff;border-radius:10px;padding:7px 10px;font-size:18px;cursor:pointer}.fcl-auth-account{display:flex;align-items:center;gap:8px;margin-left:4px}.fcl-auth-email{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#9da7c0;font-size:12px}.fcl-auth-logout{height:38px;padding:0 11px;border:1px solid #29324e;background:#0d1220;color:#fff;border-radius:10px;cursor:pointer}
-@media(max-width:700px){.fcl-auth-email{display:none}}
+<style id="legal-gate-style">
+#fcl-legal-gate{
+  position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:rgba(3,5,12,.94);backdrop-filter:blur(18px);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
+#fcl-legal-gate.hidden{display:none}
+.fcl-legal-card{
+  width:min(680px,100%);max-height:90vh;overflow:auto;padding:30px;
+  border:1px solid rgba(255,255,255,.13);border-radius:24px;
+  background:linear-gradient(180deg,#171c32,#0b0f1c);box-shadow:0 30px 100px rgba(0,0,0,.6);color:#fff;
+}
+.fcl-legal-card h1{margin:0 0 8px;font-size:clamp(25px,5vw,36px)}
+.fcl-legal-card .intro{color:#aeb7cf;line-height:1.55;margin:0 0 20px}
+.fcl-legal-rules{display:grid;gap:10px;margin:18px 0}
+.fcl-legal-rule{
+  padding:14px;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:rgba(255,255,255,.035);
+}
+.fcl-legal-rule b{display:block;margin-bottom:5px}
+.fcl-legal-rule span{color:#aeb7cf;font-size:13px;line-height:1.5}
+.fcl-legal-checks{display:grid;gap:10px;margin:20px 0}
+.fcl-legal-check{
+  display:flex;gap:11px;align-items:flex-start;padding:12px 13px;border-radius:13px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;
+}
+.fcl-legal-check input{width:19px;height:19px;flex:0 0 auto;margin-top:1px;accent-color:#765cff}
+.fcl-legal-check span{font-size:13px;line-height:1.5;color:#dfe5f5}
+#fcl-legal-accept{
+  width:100%;padding:15px 18px;border:0;border-radius:14px;background:linear-gradient(90deg,#765cff,#25cfee);
+  color:#fff;font-weight:900;font-size:16px;cursor:pointer;transition:.2s;
+}
+#fcl-legal-accept:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.3)}
+.fcl-legal-note{font-size:11px;color:#77819d;line-height:1.5;margin-top:13px;text-align:center}
+@media(max-width:650px){.fcl-legal-card{padding:22px 17px;border-radius:20px}}
 </style>
-
 </head>
-<body><!-- ACCES OBLIGATOIRE PAR E-MAIL -->
-<div id="emailGate" style="position:fixed;inset:0;z-index:999999;background:#07080d;display:flex;align-items:center;justify-content:center;padding:20px"><div style="width:min(460px,100%);background:#10121b;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:32px;box-shadow:0 20px 80px rgba(0,0,0,.55);text-align:center"><div style="font-size:34px;font-weight:900;margin-bottom:8px">Bienvenue sur Fortnite Creator Lab</div><div style="color:#aeb4c2;margin-bottom:24px">Entre ton adresse e-mail pour accéder au site.</div><form id="emailGateForm"><input id="entryEmail" type="email" required autocomplete="email" placeholder="Ton adresse e-mail" style="box-sizing:border-box;width:100%;padding:14px 16px;border-radius:12px;border:1px solid #303544;background:#080a10;color:#fff;font-size:16px;outline:none"><button type="submit" style="width:100%;margin-top:14px;padding:14px;border:0;border-radius:12px;background:#6c5ce7;color:#fff;font-weight:800;font-size:16px;cursor:pointer">Accéder à la formation</button><div id="emailGateError" style="display:none;color:#ff6b6b;margin-top:12px;font-size:14px"></div></form></div></div><script>(function(){const gate=document.getElementById('emailGate'),form=document.getElementById('emailGateForm'),input=document.getElementById('entryEmail'),error=document.getElementById('emailGateError'),saved=localStorage.getItem('fcl_entry_email');if(saved&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(saved)){gate.style.display='none'}else{document.documentElement.style.overflow='hidden'}form.addEventListener('submit',function(e){e.preventDefault();const email=input.value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){error.textContent='Entre une adresse e-mail valide.';error.style.display='block';return}localStorage.setItem('fcl_entry_email',email);gate.style.display='none';document.documentElement.style.overflow=''})})()</script>
+<body>
+<div id="fcl-legal-gate" role="dialog" aria-modal="true" aria-labelledby="fcl-legal-title">
+  <div class="fcl-legal-card">
+    <div style="font-size:38px;margin-bottom:7px">🔐</div>
+    <h1 id="fcl-legal-title">Avant d'accéder à la formation</h1>
+    <p class="intro">Bienvenue ! Avant de commencer, lis les règles ci-dessous et confirme que tu les acceptes.</p>
+
+    <div class="fcl-legal-rules">
+      <div class="fcl-legal-rule">
+        <b>📄 Conditions d'utilisation</b>
+        <span>La formation est destinée à un usage personnel. L'accès est réservé à la personne qui a acheté ou obtenu la formation.</span>
+      </div>
+      <div class="fcl-legal-rule">
+        <b>🚫 Interdiction de partage</b>
+        <span>Il est interdit de partager, revendre, publier, copier ou transmettre tout ou partie de la formation, de ses vidéos, fichiers ou accès à d'autres personnes.</span>
+      </div>
+      <div class="fcl-legal-rule">
+        <b>🔒 Respect des informations</b>
+        <span>Les informations et contenus accessibles dans la formation ne doivent pas être redistribués ou mis à disposition publiquement.</span>
+      </div>
+    </div>
+
+    <div class="fcl-legal-checks">
+      <label class="fcl-legal-check"><input type="checkbox" data-legal-check><span>J'ai lu et j'accepte les <b>conditions d'utilisation</b> de la formation.</span></label>
+      <label class="fcl-legal-check"><input type="checkbox" data-legal-check><span>Je comprends que cet accès est <b>personnel</b> et que je ne dois pas partager, revendre ou transmettre la formation.</span></label>
+      <label class="fcl-legal-check"><input type="checkbox" data-legal-check><span>Je confirme avoir pris connaissance des informations présentées avant d'accéder à la formation.</span></label>
+    </div>
+
+    <button id="fcl-legal-accept" disabled>✅ J'accepte et j'accède à la formation</button>
+    <div class="fcl-legal-note">Cette fenêtre présente les règles d'accès au site. Pour une conformité juridique complète, les textes officiels (CGV, politique de confidentialité, droit de rétractation, cookies, etc.) doivent correspondre à ta situation et être réellement disponibles sur le site.</div>
+  </div>
+</div>
 <div id="fcl-welcome" aria-modal="true" role="dialog">
   <div id="fcl-welcome-card">
     <div id="fcl-welcome-logo">⚡</div>
@@ -289,44 +342,10 @@ button:focus-visible,input:focus-visible{outline:2px solid #28d7ff;outline-offse
 </div>
 
 
-
-<div id="fcl-auth" aria-modal="true" role="dialog">
-  <div class="fcl-auth-card">
-    <button class="fcl-auth-close" id="fcl-auth-close" aria-label="Fermer">×</button>
-    <h2>🔐 Ton compte</h2>
-    <p>Crée ton compte ou connecte-toi pour utiliser ton espace Fortnite Creator Lab.</p>
-    <div class="fcl-auth-tabs">
-      <button class="fcl-auth-tab" id="fcl-tab-login">Se connecter</button>
-      <button class="fcl-auth-tab active" id="fcl-tab-signup">Créer un compte</button>
-    </div>
-    <form class="fcl-auth-form" id="fcl-auth-form">
-      <label id="fcl-auth-email-label" style="display:grid;gap:6px">
-        <span style="font-size:12px;color:#aeb7d0">Adresse e-mail <strong style="color:#ff7b8a">*</strong></span>
-        <input id="fcl-auth-email-input" type="email" placeholder="exemple@email.com" autocomplete="email" required>
-      </label>
-      <label style="display:grid;gap:6px">
-        <span style="font-size:12px;color:#aeb7d0">Mot de passe <strong style="color:#ff7b8a">*</strong></span>
-        <input id="fcl-auth-password-input" type="password" placeholder="6 caractères minimum" autocomplete="current-password" minlength="6" required>
-      </label>
-      <label id="fcl-auth-confirm-wrap" style="display:none;gap:6px">
-        <span style="font-size:12px;color:#aeb7d0">Confirmer le mot de passe <strong style="color:#ff7b8a">*</strong></span>
-        <input id="fcl-auth-confirm-input" type="password" placeholder="Retape ton mot de passe" autocomplete="new-password" minlength="6">
-      </label>
-      <button class="fcl-auth-submit" id="fcl-auth-submit" type="submit">Créer mon compte</button>
-    </form>
-    <div class="fcl-auth-status" id="fcl-auth-status"></div>
-  </div>
-</div>
-
 <div class="app">
 <header>
-  <div class="brand">⚡ FORTNITE <span>CREATOR LAB</span></div>
+  <div class="brand">⚡ FORTNITE <span>CREATOR LAB</span></div><div style="font-size:10px;color:#7f89a6;margin-left:4px">🔒 Accès personnel</div>
   <input id="search" class="search" placeholder="Rechercher…">
-  <div class="fcl-auth-account" id="fcl-auth-account">
-    <span class="fcl-auth-email" id="fcl-auth-email"></span>
-    <button class="btn" id="fcl-auth-open">🔐 Compte</button>
-    <button class="fcl-auth-logout" id="fcl-auth-logout" style="display:none">Déconnexion</button>
-  </div>
   <button class="btn" id="fit">⌗ Tout voir</button>
   <button class="btn" id="reset">⌖ Centre</button>
 </header>
@@ -952,15 +971,59 @@ window.V21_DATA = {
 
 <script id="fcl-welcome-script">
 (function(){
-  const key='fclab_welcome_seen_v1';
-  const screen=document.getElementById('fcl-welcome');
-  const start=document.getElementById('fcl-welcome-start');
-  if(!screen||!start)return;
-  function show(){screen.classList.add('show');document.body.style.overflow='hidden';setTimeout(()=>start.focus(),30);}
-  function hide(){screen.classList.remove('show');document.body.style.overflow='';try{localStorage.setItem(key,'1')}catch(e){}}
-  let seen=false;try{seen=localStorage.getItem(key)==='1'}catch(e){}
-  if(!seen) setTimeout(show,150);
-  start.addEventListener('click',hide);
+  const legalKey='fclab_legal_accepted_v1';
+  const welcomeKey='fclab_welcome_seen_v1';
+
+  const gate=document.getElementById('fcl-legal-gate');
+  const checks=[...document.querySelectorAll('[data-legal-check]')];
+  const accept=document.getElementById('fcl-legal-accept');
+
+  function updateAccept(){
+    accept.disabled=!checks.every(c=>c.checked);
+  }
+  checks.forEach(c=>c.addEventListener('change',updateAccept));
+
+  function showGate(){
+    gate.classList.remove('hidden');
+    document.body.style.overflow='hidden';
+    setTimeout(()=>checks[0]?.focus(),30);
+  }
+  function hideGate(){
+    gate.classList.add('hidden');
+    try{localStorage.setItem(legalKey,'1')}catch(e){}
+  }
+
+  let legalAccepted=false;
+  try{legalAccepted=localStorage.getItem(legalKey)==='1'}catch(e){}
+  if(legalAccepted) gate.classList.add('hidden');
+
+  accept.addEventListener('click',()=>{
+    if(accept.disabled)return;
+    hideGate();
+    showWelcomeIfNeeded();
+  });
+
+  function showWelcome(){
+    const screen=document.getElementById('fcl-welcome');
+    const start=document.getElementById('fcl-welcome-start');
+    if(!screen||!start)return;
+    screen.classList.add('show');
+    document.body.style.overflow='hidden';
+    setTimeout(()=>start.focus(),30);
+    start.addEventListener('click',()=>{
+      screen.classList.remove('show');
+      document.body.style.overflow='';
+      try{localStorage.setItem(welcomeKey,'1')}catch(e){}
+    },{once:true});
+  }
+
+  function showWelcomeIfNeeded(){
+    let seen=false;
+    try{seen=localStorage.getItem(welcomeKey)==='1'}catch(e){}
+    if(!seen)setTimeout(showWelcome,150);
+  }
+
+  if(legalAccepted) showWelcomeIfNeeded();
 })();
 </script>
 
@@ -990,74 +1053,6 @@ window.V21_DATA = {
  // Capture the current info state when the training view is rendered.
  const observer=new MutationObserver(()=>{const title=document.getElementById('fc33Title');const h=document.querySelector('#fc33Content .fc33hero h1');if(title&&h&&/📖/.test(title.textContent)){const cards=[...document.querySelectorAll('#fc33Content .fc33card')];const checked=document.querySelector('#fc33Done');if(checked){const m=document.body.innerText.match(/FORMATION/);/* marker only */} }});
  observer.observe(document.body,{childList:true,subtree:true});
-})();
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script id="fcl-supabase-auth">
-(function(){
-  const SUPABASE_URL='https://sfdqhgrqjcqlbfhzjqei.supabase.co';
-  const SUPABASE_PUBLISHABLE_KEY='sb_publishable_rYUVfylKdMPGH_OOw2W_kw_-A6t_2MJ';
-  const modal=document.getElementById('fcl-auth');
-  const form=document.getElementById('fcl-auth-form');
-  const emailInput=document.getElementById('fcl-auth-email-input');
-  const passInput=document.getElementById('fcl-auth-password-input');
-  const confirmWrap=document.getElementById('fcl-auth-confirm-wrap');
-  const confirmInput=document.getElementById('fcl-auth-confirm-input');
-  const status=document.getElementById('fcl-auth-status');
-  const submit=document.getElementById('fcl-auth-submit');
-  const loginTab=document.getElementById('fcl-tab-login');
-  const signupTab=document.getElementById('fcl-tab-signup');
-  const openBtn=document.getElementById('fcl-auth-open');
-  const closeBtn=document.getElementById('fcl-auth-close');
-  const logoutBtn=document.getElementById('fcl-auth-logout');
-  const emailLabel=document.getElementById('fcl-auth-email');
-  if(!window.supabase || !modal) return;
-  const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-  let mode='signup';
-  function setStatus(msg,ok=false){status.textContent=msg;status.style.color=ok?'#62e6a5':'#aeb7d0';}
-  function setMode(next){mode=next;const signup=mode==='signup';loginTab.classList.toggle('active',!signup);signupTab.classList.toggle('active',signup);submit.textContent=signup?'Créer mon compte':'Se connecter';passInput.autocomplete=signup?'new-password':'current-password';confirmWrap.style.display=signup?'grid':'none';confirmInput.required=signup;confirmInput.value='';setStatus('');}
-  function open(){modal.classList.add('show');setStatus('');setTimeout(()=>emailInput.focus(),30);}
-  function close(){modal.classList.remove('show');setStatus('');}
-  loginTab.onclick=()=>setMode('login'); signupTab.onclick=()=>setMode('signup'); openBtn.onclick=open;
-  setMode('signup'); closeBtn.onclick=close;
-  modal.addEventListener('click',e=>{if(e.target===modal)close();});
-  logoutBtn.onclick=async()=>{await client.auth.signOut();};
-  form.addEventListener('submit',async e=>{
-    e.preventDefault();
-    const email=emailInput.value.trim().toLowerCase(); const password=passInput.value; const confirmation=confirmInput.value;
-    if(!email){setStatus('❌ L’adresse e-mail est obligatoire.');emailInput.focus();return;}
-    if(!emailInput.checkValidity() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('❌ Entre une adresse e-mail valide.');emailInput.focus();return;}
-    if(password.length<6){setStatus('❌ Le mot de passe doit contenir au moins 6 caractères.');passInput.focus();return;}
-    if(mode==='signup' && password!==confirmation){setStatus('❌ Les deux mots de passe ne correspondent pas.');confirmInput.focus();return;}
-    submit.disabled=true; submit.style.opacity='.7'; setStatus(mode==='signup'?'Création du compte…':'Connexion…');
-    try{
-      if(mode==='signup'){
-        const {error}=await client.auth.signUp({email,password,options:{}});
-        if(error) throw error;
-        setStatus('✅ Compte créé. Vérifie ton e-mail avant de te connecter.',true);
-        form.reset();
-        setMode('login');
-      }else{
-        const {error}=await client.auth.signInWithPassword({email,password});
-        if(error) throw error;
-        close();
-      }
-    }catch(err){setStatus('❌ '+(err?.message||'Une erreur est survenue.'));}
-    finally{submit.disabled=false;submit.style.opacity='1';}
-  });
-  client.auth.onAuthStateChange((_event,session)=>{
-    if(session?.user){
-      emailLabel.textContent=session.user.email||''; emailLabel.title=session.user.email||'';
-      openBtn.style.display='none'; logoutBtn.style.display='inline-block';
-    }else{
-      emailLabel.textContent=''; openBtn.style.display='inline-block'; logoutBtn.style.display='none';
-    }
-  });
-  client.auth.getSession().then(({data})=>{
-    if(data.session){emailLabel.textContent=data.session.user.email||'';openBtn.style.display='none';logoutBtn.style.display='inline-block';}
-  });
-  window.FCLSupabase={client,getUser:()=>client.auth.getUser()};
 })();
 </script>
 </body>
